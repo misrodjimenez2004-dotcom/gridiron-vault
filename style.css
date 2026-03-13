@@ -1,0 +1,368 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #111;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+}
+
+#gameContainer {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Screens */
+.screen {
+  display: none;
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 20px;
+}
+
+#menuScreen {
+  display: block;
+}
+
+/* Buttons */
+button {
+  width: 90%;
+  max-width: 350px;
+  height: 60px;
+  font-size: 20px;
+  margin: 10px;
+  border-radius: 12px;
+  border: none;
+  background: #2c7cff;
+  color: white;
+}
+
+/* Game screen */
+#gameScreen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+#yardScore {
+  margin: 10px 0 14px 0;
+  font-size: 18px;
+}
+
+#gameCanvas {
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  background: #222;
+  border-radius: 0;
+}
+
+/* Joystick */
+#joystickBase {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 120px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  touch-action: none;
+  display: none;
+}
+
+#joystickStick {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+}
+
+/* Pack screen */
+#packArea {
+  margin-top: 20px;
+  display: none;
+}
+
+#packImage {
+  width: 200px;
+  touch-action: none;
+}
+
+#ripText {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+#packResult {
+  margin-top: 20px;
+  font-size: 20px;
+}
+
+.packCards {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: nowrap;
+}
+
+.packCard img {
+  width: 110px;
+  border-radius: 8px;
+}
+
+.revealText {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.card {
+  width: 200px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(255,255,255,0.3);
+  margin-top: 10px;
+}
+
+/* Collection screen */
+#collectionScreen {
+  display: none;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  padding: 20px 10px 120px 10px;
+}
+
+#collectionList {
+  display: grid;
+  grid-template-columns: repeat(3, 110px);
+  gap: 14px;
+  justify-content: center;
+  padding: 15px 0;
+}
+
+.collectionCard {
+  width: 110px;
+  height: 165px;
+  position: relative;
+  perspective: 1000px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+}
+
+.collectionCard img {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+.cardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+
+.cardInner.flipped {
+  transform: rotateY(180deg);
+}
+
+.cardFront,
+.cardBack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cardFront img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardBack {
+  transform: rotateY(180deg);
+  background: white;
+  color: black;
+  box-sizing: border-box;
+  padding: 6px;
+  font-size: 9px;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.cardBack h4 {
+  font-size: 10px;
+  margin: 2px 0 4px 0;
+}
+
+.cardBack p {
+  margin: 1px 0;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  margin-bottom: 4px;
+}
+
+.teamName {
+  font-weight: 600;
+  text-align: left;
+  max-width: 70px;
+}
+
+.teamLogo {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.cardStats {
+  font-size: 9px;
+  text-align: left;
+}
+
+.cardStats h4 {
+  font-size: 9px;
+  font-weight: normal;
+  margin: 2px 0;
+}
+
+.cardSet {
+  margin-top: auto;
+  font-size: 9px;
+  text-align: center;
+}
+
+.cardSerial {
+  font-size: 8px;
+  text-align: center;
+  margin-top: 3px;
+  opacity: 0.7;
+}
+
+/* Inspect popup */
+#inspectPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+#inspectViewer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#inspectFront {
+  width: 220px;
+  border-radius: 10px;
+}
+
+#inspectBack {
+  display: none;
+  background: white;
+  color: black;
+  padding: 15px;
+  width: 220px;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+#inspectButtons {
+  margin-top: 15px;
+}
+
+#inspectButtons button {
+  margin: 5px;
+}
+
+/* Utility */
+#collection {
+  margin-top: 20px;
+}
+
+.coinDisplay{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+font-size:22px;
+margin-bottom:10px;
+}
+
+.coinIcon{
+height:2.7em;
+width:auto;
+image-rendering: pixelated;
+}
+
+.coinDisplay{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:10px;
+font-size:26px;
+font-weight:bold;
+}
+
+.packPrice{
+font-size:16px;
+opacity:0.9;
+margin-top:6px;
+}
+
+.packPrice img{
+height:22px;
+width:auto;
+vertical-align:middle;
+margin:0 4px;
+object-fit:contain;
+}

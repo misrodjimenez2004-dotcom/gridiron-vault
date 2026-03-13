@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Gridiron Vault</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2c7cff">
+</head>
+
+<body>
+
+<div id="gameContainer">
+
+<div id="menuScreen" class="screen">
+<h1>GRIDIRON VAULT</h1>
+
+<div class="coinDisplay">
+<img src="images/coin.png" class="coinIcon">
+<p id="coins">0</p>
+</div>
+
+<button onclick="startGame()">PLAY</button>
+<button onclick="showPackScreen()">OPEN PACK</button>
+<button onclick="openCollection()">COLLECTION</button>
+
+</div>
+
+<div id="gameScreen" class="screen">
+
+<p id="yardScore">Yards: 0</p>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="joystickBase" style="display:none;">
+  <div id="joystickStick"></div>
+</div>
+
+
+</div>
+
+<div id="packScreen" class="screen">
+
+<h2>Open Pack</h2>
+
+<div class="coinDisplay">
+<img src="images/coin.png" class="coinIcon">
+<p id="packCoins">0</p>
+</div>
+
+<button onclick="spawnPack()">OPEN PACK</button>
+
+<p id="packPriceLabel" class="packPrice">
+200 <img src="images/coin.png" class="coinIcon"> needed to open pack!
+</p>
+
+<div id="packArea">
+
+<img id="packImage" src="images/pack.png">
+
+<p id="ripText">Swipe across the pack to rip it open</p>
+
+</div>
+
+<div id="packResult"></div>
+
+<button onclick="backToMenu()">BACK</button>
+
+</div>
+
+<div id="collectionScreen" class="screen">
+<h2>Your Cards</h2>
+<div id="collectionList"></div>
+<button onclick="showScreen('menuScreen')">BACK</button>
+</div>
+
+</div>
+
+<div id="inspectPopup">
+
+<div id="inspectViewer">
+
+<div id="inspectCard">
+
+<img id="inspectFront">
+
+<div id="inspectBack">
+
+<h3 id="inspectName"></h3>
+
+<p id="inspectTeam"></p>
+<p id="inspectHeight"></p>
+<p id="inspectWeight"></p>
+<p id="inspectForty"></p>
+<p id="inspectSet"></p>
+
+</div>
+
+</div>
+
+<div id="inspectButtons">
+
+<button onclick="flipCard()">Flip Card</button>
+<button onclick="closeInspect()">Close</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="cards.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

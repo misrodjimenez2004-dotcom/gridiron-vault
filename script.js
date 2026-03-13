@@ -1,0 +1,585 @@
+let coins = 0;
+let playerCards = [];
+let imageCache = {};
+let startX = 0;
+let swiped = false;
+let defenders = [];
+let spawnTimer = 0;
+let gameRunning = false;
+let yards = 0;
+let pressTimer = null;
+let fieldImage = new Image()
+fieldImage.src = "images/field.png"
+let fieldScroll = 0
+let packPrice = 150
+let longPressTriggered = false;
+let runnerSprite = new Image()
+runnerSprite.src = "images/runner.png"
+let defenderSprite = new Image()
+defenderSprite.src = "images/defender.png"
+
+const cardBack = new Image();
+cardBack.src = "images/card-back.png";
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+ctx.imageSmoothingEnabled = false
+
+const base = document.getElementById("joystickBase");
+const stick = document.getElementById("joystickStick");
+
+let player = {
+  x: 0,
+  y: 0,
+  radius: 15,
+  speed: 4
+};
+
+let joystick = {
+  active: false,
+  dx: 0,
+  dy: 0
+};
+
+function showScreen(screen) {
+  document.querySelectorAll(".screen").forEach(s => {
+    s.style.display = "none";
+  });
+
+  document.getElementById(screen).style.display = "block";
+
+  if (screen === "gameScreen") {
+    base.style.display = "block";
+  } else {
+    base.style.display = "none";
+  }
+}
+
+function resizeCanvas() {
+  const maxWidth = window.innerWidth;
+  const maxHeight = window.innerHeight - 120;
+
+  canvas.width = maxWidth;
+  canvas.height = maxHeight;
+}
+
+function updateCoins(){
+animateCoins(coins)
+}
+
+function saveGame() {
+  localStorage.setItem("gv_coins", coins);
+  localStorage.setItem("gv_cards", JSON.stringify(playerCards));
+  localStorage.setItem("gv_database", JSON.stringify(cards));
+}
+
+function loadGame() {
+  const savedCoins = localStorage.getItem("gv_coins");
+  const savedCards = localStorage.getItem("gv_cards");
+  const savedDatabase = localStorage.getItem("gv_database");
+
+  if (savedCoins) {
+    coins = parseInt(savedCoins, 10);
+  }
+
+  if (savedCards) {
+    playerCards = JSON.parse(savedCards);
+  }
+
+  if (savedDatabase) {
+    cards = JSON.parse(savedDatabase);
+  }
+
+  updateCoins();
+}
+
+function preloadImages() {
+  cards.forEach(card => {
+    const img = new Image();
+    img.src = card.image;
+    imageCache[card.image] = img;
+  });
+}
+
+function startGame() {
+  showScreen("gameScreen");
+
+  gameRunning = true;
+  defenders = [];
+  spawnTimer = 0;
+  yards = 0;
+
+  player.x = canvas.width / 2;
+  player.y = canvas.height - 120;
+
+  joystick.dx = 0;
+  joystick.dy = 0;
+  stick.style.left = "40px";
+  stick.style.top = "40px";
+
+  document.getElementById("yardScore").innerText = "Yards: 0";
+}
+
+function gameOver() {
+  if (!gameRunning) return;
+
+  gameRunning = false;
+
+  const earnedCoins = Math.floor(yards / 5);
+  coins += earnedCoins;
+
+  updateCoins();
+  saveGame();
+
+  alert(
+    "Tackled!\nYou ran " +
+      Math.floor(yards) +
+      " yards\nCoins earned: " +
+      earnedCoins
+  );
+
+  defenders = [];
+  showScreen("menuScreen");
+}
+
+function spawnDefender() {
+
+  // difficulty scaling
+  let difficulty = 1 + (yards / 300)
+
+  const defender = {
+    x: Math.random() * canvas.width,
+    y: -40,
+    radius: 15,
+
+    // defenders get faster as yards increase
+    speed: 2 + Math.random()*2 + difficulty,
+
+    // tracking strength increases slowly
+    tracking: 0.02 + (yards / 20000)
+  };
+
+  defenders.push(defender);
+}
+
+function updateGame() {
+  if (!gameRunning) return;
+
+  fieldScroll += 3
+
+  if(fieldScroll >= fieldImage.height){
+    fieldScroll = 0
+  }
+
+  yards += 0.1;
+  document.getElementById("yardScore").innerText =
+    "Yards: " + Math.floor(yards);
+
+  spawnTimer++;
+
+  let spawnRate = Math.max(20, 60 - yards / 25)
+
+if (spawnTimer > spawnRate) {
+  spawnDefender();
+  spawnTimer = 0;
+}
+
+  player.x += joystick.dx * player.speed;
+  player.y += joystick.dy * player.speed;
+
+  player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+  player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+
+  defenders.forEach(d => {
+
+  // move downward
+  d.y += d.speed;
+
+  // track the player horizontally
+  let dx = player.x - d.x
+  d.x += dx * d.tracking
+
+});
+
+  defenders = defenders.filter(d => d.y < canvas.height + 50);
+
+  defenders.forEach(d => {
+    const dx = player.x - d.x;
+    const dy = player.y - d.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < player.radius + d.radius) {
+      gameOver();
+    }
+  });
+}
+
+function drawGame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.drawImage(
+    fieldImage,
+    0,
+    fieldScroll,
+    canvas.width,
+    fieldImage.height
+)
+
+ctx.drawImage(
+    fieldImage,
+    0,
+    fieldScroll - fieldImage.height,
+    canvas.width,
+    fieldImage.height
+)
+
+  // PLAYER
+  let size = 120
+
+  ctx.drawImage(
+    runnerSprite,
+    player.x - size/2,
+    player.y - size/2,
+    size,
+    size
+  )
+
+  // DEFENDERS
+  let defenderSize = 160
+
+  defenders.forEach(d => {
+
+  ctx.drawImage(
+  defenderSprite,
+  d.x - defenderSize/2,
+  d.y - defenderSize/2,
+  defenderSize,
+  defenderSize
+)
+
+});
+}
+
+function gameLoop() {
+  updateGame();
+  drawGame();
+  requestAnimationFrame(gameLoop);
+}
+
+function showPackScreen() {
+  updateCoins();
+  showScreen("packScreen");
+}
+
+function spawnPack() {
+  if (coins < packPrice) {
+    alert("Not enough coins");
+    return;
+  }
+
+  coins -= packPrice;
+  updateCoins();
+
+  swiped = false;
+
+  document.getElementById("packResult").innerHTML = "";
+  document.getElementById("packArea").style.display = "block";
+
+  saveGame();
+}
+
+function backToMenu() {
+  document.getElementById("packResult").innerHTML = "";
+  document.getElementById("packArea").style.display = "none";
+  showScreen("menuScreen");
+}
+
+function openPack() {
+  document.getElementById("packArea").style.display = "none";
+
+  const available = cards.filter(c => c.nextSerial <= c.total);
+
+  if (available.length === 0) {
+    alert("All cards pulled");
+    return;
+  }
+
+  const pulledCards = [];
+
+  for (let i = 0; i < 3; i++) {
+    const card = available[Math.floor(Math.random() * available.length)];
+    const serial = card.nextSerial;
+    card.nextSerial++;
+
+    const pulledCard = {
+      ...card,
+      serial: serial
+    };
+
+    pulledCards.push(pulledCard);
+    playerCards.push(pulledCard);
+  }
+
+  revealCards(pulledCards);
+  saveGame();
+}
+
+let coinAnimation = null
+
+function animateCoins(targetCoins){
+
+let coinsElement = document.getElementById("coins")
+let packCoinsElement = document.getElementById("packCoins")
+
+let current = parseInt(coinsElement.innerText)
+
+let step = targetCoins > current ? 1 : -1
+
+if(coinAnimation){
+clearInterval(coinAnimation)
+}
+
+coinAnimation = setInterval(() => {
+
+if(current === targetCoins){
+clearInterval(coinAnimation)
+coinAnimation = null
+return
+}
+
+current += step
+
+coinsElement.innerText = current
+packCoinsElement.innerText = current
+
+}, 15)
+
+}
+
+function revealCards(cardsToReveal) {
+  const result = document.getElementById("packResult");
+
+  result.innerHTML = `
+    <p class="revealText">Touch card to reveal</p>
+    <div class="packCards" id="packCards"></div>
+  `;
+
+  const container = document.getElementById("packCards");
+
+  cardsToReveal.forEach(card => {
+    const cardDiv = document.createElement("div");
+    cardDiv.className = "packCard";
+
+    cardDiv.innerHTML = `
+      <img src="${cardBack.src}" class="cardImage">
+    `;
+
+    const img = cardDiv.querySelector("img");
+
+    cardDiv.addEventListener("touchstart", e => {
+      e.preventDefault();
+
+      if (img.dataset.revealed) return;
+
+      img.src = imageCache[card.image].src;
+      img.dataset.revealed = "true";
+    });
+
+    cardDiv.addEventListener("click", e => {
+      e.preventDefault();
+
+      if (img.dataset.revealed) return;
+
+      img.src = imageCache[card.image].src;
+      img.dataset.revealed = "true";
+    });
+
+    container.appendChild(cardDiv);
+  });
+}
+
+function openCollection() {
+  showCollection();
+  showScreen("collectionScreen");
+}
+
+function showCollection() {
+  const area = document.getElementById("collectionList");
+  area.innerHTML = "";
+
+  if (playerCards.length === 0) {
+    area.innerHTML = "<p>No cards yet</p>";
+    return;
+  }
+
+  playerCards.forEach((card, index) => {
+    area.innerHTML += `
+      <div class="collectionCard"
+           ontouchstart="startPress(event, ${index})"
+           ontouchend="endPress(event, ${index})"
+           ontouchmove="cancelPress()">
+
+        <div class="cardInner" id="cardInner${index}">
+
+          <div class="cardFront">
+            <img src="${card.image}">
+          </div>
+
+          <div class="cardBack">
+            <div class="cardHeader">
+              <span class="teamName">${card.team}</span>
+              <img class="teamLogo" src="${card.logo}">
+            </div>
+
+            <div class="cardStats">
+              <h4>${card.name}</h4>
+              <p>Height: ${card.height}</p>
+              <p>Weight: ${card.weight}</p>
+              <p>Position: ${card.position}</p>
+              <p>College: ${card.college}</p>
+            </div>
+
+            <div class="cardSet">${card.set}</div>
+            <div class="cardSerial">#${card.serial} / ${card.total}</div>
+          </div>
+
+        </div>
+      </div>
+    `;
+  });
+}
+
+function startPress(e, index) {
+  longPressTriggered = false;
+
+  pressTimer = setTimeout(() => {
+    longPressTriggered = true;
+    inspectCard(playerCards[index]);
+  }, 500);
+}
+
+function endPress(e, index) {
+  clearTimeout(pressTimer);
+
+  if (longPressTriggered) {
+    longPressTriggered = false;
+    return;
+  }
+
+  flipCollectionCard(index);
+}
+
+function flipCollectionCard(index) {
+  const card = document.getElementById("cardInner" + index);
+  if (card) {
+    card.classList.toggle("flipped");
+  }
+}
+
+function cancelPress() {
+  clearTimeout(pressTimer);
+}
+
+function inspectCard(card) {
+  document.getElementById("inspectPopup").style.display = "flex";
+  document.getElementById("inspectFront").style.display = "block";
+  document.getElementById("inspectBack").style.display = "none";
+
+  document.getElementById("inspectFront").src = card.image;
+  document.getElementById("inspectName").innerText = card.name;
+  document.getElementById("inspectTeam").innerText = "Team: " + card.team;
+  document.getElementById("inspectHeight").innerText = "Height: " + card.height;
+  document.getElementById("inspectWeight").innerText = "Weight: " + card.weight;
+  document.getElementById("inspectForty").innerText = "Position: " + card.position;
+  document.getElementById("inspectSet").innerText = "Set: " + card.set;
+}
+
+function flipCard() {
+  const front = document.getElementById("inspectFront");
+  const back = document.getElementById("inspectBack");
+
+  if (front.style.display !== "none") {
+    front.style.display = "none";
+    back.style.display = "block";
+  } else {
+    front.style.display = "block";
+    back.style.display = "none";
+  }
+}
+
+function closeInspect() {
+  document.getElementById("inspectPopup").style.display = "none";
+}
+
+window.onload = function () {
+  resizeCanvas();
+  preloadImages();
+  loadGame();
+
+  const pack = document.getElementById("packImage");
+
+  if (pack) {
+    pack.addEventListener("touchstart", e => {
+      startX = e.touches[0].clientX;
+    });
+
+    pack.addEventListener("touchmove", e => {
+      const currentX = e.touches[0].clientX;
+      const distance = currentX - startX;
+
+      if (distance > 120 && !swiped) {
+        swiped = true;
+        openPack();
+      }
+    });
+  }
+
+  base.addEventListener("touchstart", e => {
+    e.preventDefault();
+    joystick.active = true;
+  });
+
+  base.addEventListener("touchmove", e => {
+    e.preventDefault();
+
+    const rect = base.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    let x = touch.clientX - rect.left - 60;
+    let y = touch.clientY - rect.top - 60;
+
+    const distance = Math.sqrt(x * x + y * y);
+    const max = 40;
+
+    if (distance > max) {
+      x = (x / distance) * max;
+      y = (y / distance) * max;
+    }
+
+    stick.style.left = x + 60 - 20 + "px";
+    stick.style.top = y + 60 - 20 + "px";
+
+    joystick.dx = x / max;
+    joystick.dy = y / max;
+  });
+
+  base.addEventListener("touchend", () => {
+    joystick.active = false;
+    joystick.dx = 0;
+    joystick.dy = 0;
+
+    stick.style.left = "40px";
+    stick.style.top = "40px";
+  });
+
+  showScreen("menuScreen");
+  gameLoop();
+};
+
+window.addEventListener("resize", resizeCanvas);
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js")
+  .then(() => console.log("Service Worker Registered"));
+}
