@@ -1,7 +1,7 @@
 const SUPABASE_URL = "https://rtvfxoqrhypuaktlegcr.supabase.co"
 const SUPABASE_KEY = "sb_publishable_UgxzqZ4oe8M0w2axk3rgOw_VMJaXt5q"
 
-const supabase = window.supabase.createClient(
+window.supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 )
@@ -86,7 +86,7 @@ function saveGame() {
 
 if(user){
 
-supabase
+supabaseClient
 .from("players")
 .update({coins: coins})
 .eq("id", user)
@@ -544,7 +544,7 @@ async function createAccount(){
 let username = document.getElementById("usernameInput").value
 let password = document.getElementById("passwordInput").value
 
-const { data, error } = await supabase
+const { data, error } = await supabaseClient
 .from("players")
 .insert({
 username: username,
@@ -570,7 +570,7 @@ async function login(){
 let username = document.getElementById("usernameInput").value
 let password = document.getElementById("passwordInput").value
 
-const { data, error } = await supabase
+const { data, error } = await supabaseClient
 .from("players")
 .select("*")
 .eq("username", username)
