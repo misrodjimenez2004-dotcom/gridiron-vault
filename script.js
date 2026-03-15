@@ -503,70 +503,18 @@ function closeInspect() {
 }
 
 window.onload = function () {
+
   resizeCanvas();
   checkGameVersion();
-  preloadImages();
-  loadGame();
 
-  const pack = document.getElementById("packImage");
-
-  if (pack) {
-    pack.addEventListener("touchstart", e => {
-      startX = e.touches[0].clientX;
-    });
-
-    pack.addEventListener("touchmove", e => {
-      const currentX = e.touches[0].clientX;
-      const distance = currentX - startX;
-
-      if (distance > 120 && !swiped) {
-        swiped = true;
-        openPack();
-      }
-    });
+  if(typeof cards === "undefined"){
+    console.error("cards.js failed to load")
+    return
   }
 
-  base.addEventListener("touchstart", e => {
-    e.preventDefault();
-    joystick.active = true;
-  });
-
-  base.addEventListener("touchmove", e => {
-    e.preventDefault();
-
-    const rect = base.getBoundingClientRect();
-    const touch = e.touches[0];
-
-    let x = touch.clientX - rect.left - 60;
-    let y = touch.clientY - rect.top - 60;
-
-    const distance = Math.sqrt(x * x + y * y);
-    const max = 40;
-
-    if (distance > max) {
-      x = (x / distance) * max;
-      y = (y / distance) * max;
-    }
-
-    stick.style.left = x + 60 - 20 + "px";
-    stick.style.top = y + 60 - 20 + "px";
-
-    joystick.dx = x / max;
-    joystick.dy = y / max;
-  });
-
-  base.addEventListener("touchend", () => {
-    joystick.active = false;
-    joystick.dx = 0;
-    joystick.dy = 0;
-
-    stick.style.left = "40px";
-    stick.style.top = "40px";
-  });
-
-  showScreen("loginScreen");
-  gameLoop();
-};
+  preloadImages();
+  loadGame();
+}
 
 window.addEventListener("resize", resizeCanvas);
 
