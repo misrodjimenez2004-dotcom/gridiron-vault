@@ -1,10 +1,10 @@
-const SUPABASE_URL = "https://rtvfxoqrhypuaktlegcr.supabase.co"
-const SUPABASE_KEY = "sb_publishable_UgxzqZ4oe8M0w2axk3rgOw_VMJaXt5q"
+const SUPABASE_URL = "https://rtvfxoqrhypuaktlegcr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_UgxzqZ4oe8M0w2axk3rgOw_VMJaXt5q";
 
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
-)
+);
 
 let coins = 0;
 let playerCards = [];
@@ -16,11 +16,12 @@ let spawnTimer = 0;
 let gameRunning = false;
 let yards = 0;
 let pressTimer = null;
+let fieldScroll = 0;
+let packPrice = 200;
+let longPressTriggered = false;
+
 let fieldImage = new Image();
 fieldImage.src = "images/field.png";
-let fieldScroll = 0;
-let packPrice = 0;
-let longPressTriggered = false;
 
 let runnerSprite = new Image();
 runnerSprite.src = "images/runner.png";
@@ -38,7 +39,7 @@ ctx.imageSmoothingEnabled = false;
 const base = document.getElementById("joystickBase");
 const stick = document.getElementById("joystickStick");
 
-const GAME_VERSION = "1.2";
+const GAME_VERSION = "1.3";
 
 let player = {
   x: 0,
@@ -58,7 +59,8 @@ function showScreen(screen) {
     s.style.display = "none";
   });
 
-  document.getElementById(screen).style.display = "block";
+  const target = document.getElementById(screen);
+  if (target) target.style.display = "block";
 
   if (screen === "gameScreen") {
     base.style.display = "block";
@@ -82,16 +84,15 @@ function saveGame() {
   localStorage.setItem("gv_coins", coins);
   localStorage.setItem("gv_cards", JSON.stringify(playerCards));
   localStorage.setItem("gv_database", JSON.stringify(cards));
-  let user = localStorage.getItem("gv_user")
 
-if(user){
+  const user = localStorage.getItem("gv_user");
 
-supabaseClient
-.from("players")
-.update({coins: coins})
-.eq("id", user)
-
-}
+  if (user) {
+    supabase
+      .from("players")
+      .update({ coins: coins })
+      .eq("id", user);
+  }
 }
 
 function checkGameVersion() {
@@ -174,7 +175,7 @@ function gameOver() {
 }
 
 function spawnDefender() {
-  let difficulty = 1 + yards / 300;
+  const difficulty = 1 + yards / 300;
 
   const defender = {
     x: Math.random() * canvas.width,
@@ -201,7 +202,7 @@ function updateGame() {
 
   spawnTimer++;
 
-  let spawnRate = Math.max(20, 60 - yards / 25);
+  const spawnRate = Math.max(20, 60 - yards / 25);
   if (spawnTimer > spawnRate) {
     spawnDefender();
     spawnTimer = 0;
@@ -216,9 +217,9 @@ function updateGame() {
   defenders.forEach(d => {
     d.y += d.speed;
 
-    let dx = player.x - d.x;
-    let dy = player.y - d.y;
-    let distance = Math.sqrt(dx * dx + dy * dy);
+    const dx = player.x - d.x;
+    const dy = player.y - d.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
     d.x += dx * (d.tracking + distance / 50000);
   });
@@ -242,7 +243,7 @@ function drawGame() {
   ctx.drawImage(fieldImage, 0, fieldScroll, canvas.width, fieldImage.height);
   ctx.drawImage(fieldImage, 0, fieldScroll - fieldImage.height, canvas.width, fieldImage.height);
 
-  let size = 120;
+  const size = 120;
   ctx.drawImage(
     runnerSprite,
     player.x - size / 2,
@@ -251,7 +252,7 @@ function drawGame() {
     size
   );
 
-  let defenderSize = 160;
+  const defenderSize = 160;
   defenders.forEach(d => {
     ctx.drawImage(
       defenderSprite,
@@ -329,11 +330,12 @@ function openPack() {
 let coinAnimation = null;
 
 function animateCoins(targetCoins) {
-  let coinsElement = document.getElementById("coins");
-  let packCoinsElement = document.getElementById("packCoins");
+  const coinsElement = document.getElementById("coins");
+  const packCoinsElement = document.getElementById("packCoins");
 
-  let current = parseInt(coinsElement.innerText || "0", 10);
-  let step = targetCoins > current ? 1 : -1;
+  const startText = coinsElement ? coinsElement.innerText : "0";
+  let current = parseInt(startText || "0", 10);
+  const step = targetCoins > current ? 1 : -1;
 
   if (coinAnimation) {
     clearInterval(coinAnimation);
@@ -502,19 +504,132 @@ function closeInspect() {
   document.getElementById("inspectPopup").style.display = "none";
 }
 
-window.onload = function () {
+async function createAccount() {
+  const username = document.getElementById("usernameInput").value.trim();
+  const password = document.getElementById("passwordInput").value.trim();
 
+  if (!username || !password) {
+    alert("Enter username and password");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("players")
+    .insert([{
+      username: username,
+      password: password,
+      coins: 0
+    }]);
+
+  if (error) {
+    console.error(error);
+    alert("Username already taken or account creation failed");
+    return;
+  }
+
+  alert("Account created!");
+  showScreen("menuScreen");
+}
+
+async function login() {
+  const username = document.getElementById("usernameInput").value.trim();
+  const password = document.getElementById("passwordInput").value.trim();
+
+  if (!username || !password) {
+    alert("Enter username and password");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("players")
+    .select("*")
+    .eq("username", username)
+    .eq("password", password)
+    .single();
+
+  if (error || !data) {
+    console.error(error);
+    alert("Invalid login");
+    return;
+  }
+
+  localStorage.setItem("gv_user", data.id);
+  coins = data.coins || 0;
+  updateCoins();
+
+  showScreen("menuScreen");
+}
+
+window.onload = function () {
   resizeCanvas();
   checkGameVersion();
 
-  if(typeof cards === "undefined"){
-    console.error("cards.js failed to load")
-    return
+  if (typeof cards === "undefined") {
+    console.error("cards.js failed to load");
+    return;
   }
 
   preloadImages();
   loadGame();
-}
+
+  const pack = document.getElementById("packImage");
+
+  if (pack) {
+    pack.addEventListener("touchstart", e => {
+      startX = e.touches[0].clientX;
+    });
+
+    pack.addEventListener("touchmove", e => {
+      const currentX = e.touches[0].clientX;
+      const distance = currentX - startX;
+
+      if (distance > 120 && !swiped) {
+        swiped = true;
+        openPack();
+      }
+    });
+  }
+
+  base.addEventListener("touchstart", e => {
+    e.preventDefault();
+    joystick.active = true;
+  });
+
+  base.addEventListener("touchmove", e => {
+    e.preventDefault();
+
+    const rect = base.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    let x = touch.clientX - rect.left - 60;
+    let y = touch.clientY - rect.top - 60;
+
+    const distance = Math.sqrt(x * x + y * y);
+    const max = 40;
+
+    if (distance > max) {
+      x = (x / distance) * max;
+      y = (y / distance) * max;
+    }
+
+    stick.style.left = x + 60 - 20 + "px";
+    stick.style.top = y + 60 - 20 + "px";
+
+    joystick.dx = x / max;
+    joystick.dy = y / max;
+  });
+
+  base.addEventListener("touchend", () => {
+    joystick.active = false;
+    joystick.dx = 0;
+    joystick.dy = 0;
+    stick.style.left = "40px";
+    stick.style.top = "40px";
+  });
+
+  showScreen("loginScreen");
+  gameLoop();
+};
 
 window.addEventListener("resize", resizeCanvas);
 
@@ -537,55 +652,4 @@ if ("serviceWorker" in navigator) {
       });
     });
   });
-}
-
-async function createAccount(){
-
-let username = document.getElementById("usernameInput").value
-let password = document.getElementById("passwordInput").value
-
-const { data, error } = await supabase
-.from("players")
-.insert([{
-username: username,
-password: password,
-coins: 0
-}])
-
-if(error){
-alert("Username already taken")
-}else{
-alert("Account created!")
-showScreen("menuScreen")
-}
-
-}
-
-async function login(){
-
-let username = document.getElementById("usernameInput").value
-let password = document.getElementById("passwordInput").value
-
-const { data, error } = await supabase
-.from("players")
-.select("*")
-.eq("username", username)
-.eq("password", password)
-.single()
-
-if(data){
-
-localStorage.setItem("gv_user", data.id)
-
-coins = data.coins
-updateCoins()
-
-showScreen("menuScreen")
-
-}else{
-
-alert("Invalid login")
-
-}
-
 }
