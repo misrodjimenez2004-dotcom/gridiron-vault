@@ -1,3 +1,11 @@
+const SUPABASE_URL = "https://rtvfxoqrhypuaktlegcr.supabase.co"
+const SUPABASE_KEY = "sb_publishable_UgxzqZ4oe8M0w2axk3rgOw_VMJaXt5q"
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+)
+
 let coins = 0;
 let playerCards = [];
 let imageCache = {};
@@ -74,6 +82,16 @@ function saveGame() {
   localStorage.setItem("gv_coins", coins);
   localStorage.setItem("gv_cards", JSON.stringify(playerCards));
   localStorage.setItem("gv_database", JSON.stringify(cards));
+  let user = localStorage.getItem("gv_user")
+
+if(user){
+
+supabase
+.from("players")
+.update({coins: coins})
+.eq("id", user)
+
+}
 }
 
 function checkGameVersion() {
@@ -546,7 +564,7 @@ window.onload = function () {
     stick.style.top = "40px";
   });
 
-  showScreen("menuScreen");
+  showScreen("loginScreen");
   gameLoop();
 };
 
@@ -571,4 +589,59 @@ if ("serviceWorker" in navigator) {
       });
     });
   });
+}
+
+async function createAccount(){
+
+let username = document.getElementById("usernameInput").value
+let password = document.getElementById("passwordInput").value
+
+const { data, error } = await supabase
+.from("players")
+.insert({
+username: username,
+password: password,
+coins: 0
+})
+
+if(error){
+
+alert("Username already taken")
+
+}else{
+
+alert("Account created!")
+showScreen("menuScreen")
+
+}
+
+}
+
+async function login(){
+
+let username = document.getElementById("usernameInput").value
+let password = document.getElementById("passwordInput").value
+
+const { data, error } = await supabase
+.from("players")
+.select("*")
+.eq("username", username)
+.eq("password", password)
+.single()
+
+if(data){
+
+localStorage.setItem("gv_user", data.id)
+
+coins = data.coins
+updateCoins()
+
+showScreen("menuScreen")
+
+}else{
+
+alert("Invalid login")
+
+}
+
 }

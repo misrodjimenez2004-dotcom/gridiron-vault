@@ -12,6 +12,20 @@
 
 <div id="gameContainer">
 
+<div id="loginScreen" class="screen">
+
+<h2>Gridiron Vault Login</h2>
+
+<input id="usernameInput" placeholder="Username">
+
+<input id="passwordInput" type="password" placeholder="Password">
+
+<button onclick="createAccount()">Create Account</button>
+
+<button onclick="login()">Login</button>
+
+</div>
+
 <div id="menuScreen" class="screen">
 <h1>GRIDIRON VAULT</h1>
 
@@ -109,6 +123,7 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="cards.js?v=3"></script>
 <script src="script.js?v=3"></script>
 
