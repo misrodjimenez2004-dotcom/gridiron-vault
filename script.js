@@ -583,3 +583,26 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js")
   .then(() => console.log("Service Worker Registered"));
 }
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js").then(reg => {
+
+    if (reg.waiting) {
+      reg.waiting.postMessage({ type: "SKIP_WAITING" });
+      window.location.reload();
+    }
+
+    reg.addEventListener("updatefound", () => {
+      const newWorker = reg.installing;
+
+      newWorker.addEventListener("statechange", () => {
+        if (newWorker.state === "installed") {
+          if (navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        }
+      });
+    });
+
+  });
+}
