@@ -1,24 +1,22 @@
-const CACHE_NAME = "gridiron-vault-v1";
+const VERSION = "gv-v2";
 
 self.addEventListener("install", event => {
-  console.log("Service Worker installed");
+  console.log("Installing new version:", VERSION);
   self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
-  console.log("Service Worker activated");
+  console.log("Activating new version:", VERSION);
 
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+        keys.map(key => caches.delete(key))
       );
     })
   );
 
-  self.clients.claim();
+  return self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
