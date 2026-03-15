@@ -64,6 +64,15 @@ function resizeCanvas() {
   canvas.height = maxHeight;
 }
 
+const GAME_VERSION = "1.1";
+
+const savedVersion = localStorage.getItem("gv_version");
+
+if(savedVersion !== GAME_VERSION){
+  localStorage.removeItem("gv_database");
+  localStorage.setItem("gv_version", GAME_VERSION);
+}
+
 function updateCoins(){
 animateCoins(coins)
 }
