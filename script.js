@@ -8,26 +8,29 @@ let spawnTimer = 0;
 let gameRunning = false;
 let yards = 0;
 let pressTimer = null;
-let fieldImage = new Image()
-fieldImage.src = "images/field.png"
-let fieldScroll = 0
-let packPrice = 0
+let fieldImage = new Image();
+fieldImage.src = "images/field.png";
+let fieldScroll = 0;
+let packPrice = 0;
 let longPressTriggered = false;
-let runnerSprite = new Image()
-runnerSprite.src = "images/runner.png"
-let defenderSprite = new Image()
-defenderSprite.src = "images/defender.png"
+
+let runnerSprite = new Image();
+runnerSprite.src = "images/runner.png";
+
+let defenderSprite = new Image();
+defenderSprite.src = "images/defender.png";
 
 const cardBack = new Image();
 cardBack.src = "images/card-back.png";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-
-ctx.imageSmoothingEnabled = false
+ctx.imageSmoothingEnabled = false;
 
 const base = document.getElementById("joystickBase");
 const stick = document.getElementById("joystickStick");
+
+const GAME_VERSION = "1.2";
 
 let player = {
   x: 0,
@@ -59,13 +62,12 @@ function showScreen(screen) {
 function resizeCanvas() {
   const maxWidth = window.innerWidth;
   const maxHeight = window.innerHeight - 120;
-
   canvas.width = maxWidth;
   canvas.height = maxHeight;
 }
 
-function updateCoins(){
-animateCoins(coins)
+function updateCoins() {
+  animateCoins(coins);
 }
 
 function saveGame() {
@@ -74,22 +76,13 @@ function saveGame() {
   localStorage.setItem("gv_database", JSON.stringify(cards));
 }
 
-const GAME_VERSION = "1.1";
+function checkGameVersion() {
+  const savedVersion = localStorage.getItem("gv_version");
 
-function checkGameVersion(){
-
-let savedVersion = localStorage.getItem("gv_version")
-
-if(savedVersion !== GAME_VERSION){
-
-// reset database but keep coins/cards safe
-localStorage.removeItem("gv_database")
-
-// save new version
-localStorage.setItem("gv_version", GAME_VERSION)
-
-}
-
+  if (savedVersion !== GAME_VERSION) {
+    localStorage.removeItem("gv_database");
+    localStorage.setItem("gv_version", GAME_VERSION);
+  }
 }
 
 function loadGame() {
@@ -127,6 +120,7 @@ function startGame() {
   defenders = [];
   spawnTimer = 0;
   yards = 0;
+  fieldScroll = 0;
 
   player.x = canvas.width / 2;
   player.y = canvas.height - 120;
@@ -162,20 +156,14 @@ function gameOver() {
 }
 
 function spawnDefender() {
-
-  // difficulty scaling
-  let difficulty = 1 + (yards / 300)
+  let difficulty = 1 + yards / 300;
 
   const defender = {
     x: Math.random() * canvas.width,
     y: -40,
     radius: 15,
-
-    // defenders get faster as yards increase
-    speed: 2 + Math.random()*2 + difficulty,
-
-    // tracking strength increases slowly
-    tracking: 0.02 + (yards / 20000)
+    speed: 2 + Math.random() * 2 + difficulty,
+    tracking: 0.02 + yards / 20000
   };
 
   defenders.push(defender);
@@ -184,10 +172,9 @@ function spawnDefender() {
 function updateGame() {
   if (!gameRunning) return;
 
-  fieldScroll += 3 + (yards / 500)
-
-  if(fieldScroll >= fieldImage.height){
-    fieldScroll = 0
+  fieldScroll += 3 + yards / 500;
+  if (fieldScroll >= fieldImage.height) {
+    fieldScroll = 0;
   }
 
   yards += 0.1;
@@ -196,12 +183,11 @@ function updateGame() {
 
   spawnTimer++;
 
-  let spawnRate = Math.max(20, 60 - yards / 25)
-
-if (spawnTimer > spawnRate) {
-  spawnDefender();
-  spawnTimer = 0;
-}
+  let spawnRate = Math.max(20, 60 - yards / 25);
+  if (spawnTimer > spawnRate) {
+    spawnDefender();
+    spawnTimer = 0;
+  }
 
   player.x += joystick.dx * player.speed;
   player.y += joystick.dy * player.speed;
@@ -210,15 +196,14 @@ if (spawnTimer > spawnRate) {
   player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
 
   defenders.forEach(d => {
+    d.y += d.speed;
 
-  // move downward
-  d.y += d.speed;
+    let dx = player.x - d.x;
+    let dy = player.y - d.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
 
-  // track the player horizontally
-  let dx = player.x - d.x
-  d.x += dx * (d.tracking + distance / 50000)
-
-});
+    d.x += dx * (d.tracking + distance / 50000);
+  });
 
   defenders = defenders.filter(d => d.y < canvas.height + 50);
 
@@ -236,47 +221,28 @@ if (spawnTimer > spawnRate) {
 function drawGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.drawImage(
-    fieldImage,
-    0,
-    fieldScroll,
-    canvas.width,
-    fieldImage.height
-)
+  ctx.drawImage(fieldImage, 0, fieldScroll, canvas.width, fieldImage.height);
+  ctx.drawImage(fieldImage, 0, fieldScroll - fieldImage.height, canvas.width, fieldImage.height);
 
-ctx.drawImage(
-    fieldImage,
-    0,
-    fieldScroll - fieldImage.height,
-    canvas.width,
-    fieldImage.height
-)
-
-  // PLAYER
-  let size = 120
-
+  let size = 120;
   ctx.drawImage(
     runnerSprite,
-    player.x - size/2,
-    player.y - size/2,
+    player.x - size / 2,
+    player.y - size / 2,
     size,
     size
-  )
+  );
 
-  // DEFENDERS
-  let defenderSize = 160
-
+  let defenderSize = 160;
   defenders.forEach(d => {
-
-  ctx.drawImage(
-  defenderSprite,
-  d.x - defenderSize/2,
-  d.y - defenderSize/2,
-  defenderSize,
-  defenderSize
-)
-
-});
+    ctx.drawImage(
+      defenderSprite,
+      d.x - defenderSize / 2,
+      d.y - defenderSize / 2,
+      defenderSize,
+      defenderSize
+    );
+  });
 }
 
 function gameLoop() {
@@ -300,7 +266,6 @@ function spawnPack() {
   updateCoins();
 
   swiped = false;
-
   document.getElementById("packResult").innerHTML = "";
   document.getElementById("packArea").style.display = "block";
 
@@ -343,36 +308,31 @@ function openPack() {
   saveGame();
 }
 
-let coinAnimation = null
+let coinAnimation = null;
 
-function animateCoins(targetCoins){
+function animateCoins(targetCoins) {
+  let coinsElement = document.getElementById("coins");
+  let packCoinsElement = document.getElementById("packCoins");
 
-let coinsElement = document.getElementById("coins")
-let packCoinsElement = document.getElementById("packCoins")
+  let current = parseInt(coinsElement.innerText || "0", 10);
+  let step = targetCoins > current ? 1 : -1;
 
-let current = parseInt(coinsElement.innerText)
+  if (coinAnimation) {
+    clearInterval(coinAnimation);
+  }
 
-let step = targetCoins > current ? 1 : -1
+  coinAnimation = setInterval(() => {
+    if (current === targetCoins) {
+      clearInterval(coinAnimation);
+      coinAnimation = null;
+      return;
+    }
 
-if(coinAnimation){
-clearInterval(coinAnimation)
-}
+    current += step;
 
-coinAnimation = setInterval(() => {
-
-if(current === targetCoins){
-clearInterval(coinAnimation)
-coinAnimation = null
-return
-}
-
-current += step
-
-coinsElement.innerText = current
-packCoinsElement.innerText = current
-
-}, 15)
-
+    if (coinsElement) coinsElement.innerText = current;
+    if (packCoinsElement) packCoinsElement.innerText = current;
+  }, 15);
 }
 
 function revealCards(cardsToReveal) {
@@ -397,18 +357,14 @@ function revealCards(cardsToReveal) {
 
     cardDiv.addEventListener("touchstart", e => {
       e.preventDefault();
-
       if (img.dataset.revealed) return;
-
       img.src = imageCache[card.image].src;
       img.dataset.revealed = "true";
     });
 
     cardDiv.addEventListener("click", e => {
       e.preventDefault();
-
       if (img.dataset.revealed) return;
-
       img.src = imageCache[card.image].src;
       img.dataset.revealed = "true";
     });
@@ -439,7 +395,6 @@ function showCollection() {
            ontouchmove="cancelPress()">
 
         <div class="cardInner" id="cardInner${index}">
-
           <div class="cardFront">
             <img src="${card.image}">
           </div>
@@ -461,7 +416,6 @@ function showCollection() {
             <div class="cardSet">${card.set}</div>
             <div class="cardSerial">#${card.serial} / ${card.total}</div>
           </div>
-
         </div>
       </div>
     `;
@@ -532,44 +486,89 @@ function closeInspect() {
 
 window.onload = function () {
   resizeCanvas();
-  preloadImages();
-
   checkGameVersion();
-
+  preloadImages();
   loadGame();
-}
+
+  const pack = document.getElementById("packImage");
+
+  if (pack) {
+    pack.addEventListener("touchstart", e => {
+      startX = e.touches[0].clientX;
+    });
+
+    pack.addEventListener("touchmove", e => {
+      const currentX = e.touches[0].clientX;
+      const distance = currentX - startX;
+
+      if (distance > 120 && !swiped) {
+        swiped = true;
+        openPack();
+      }
+    });
+  }
+
+  base.addEventListener("touchstart", e => {
+    e.preventDefault();
+    joystick.active = true;
+  });
+
+  base.addEventListener("touchmove", e => {
+    e.preventDefault();
+
+    const rect = base.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    let x = touch.clientX - rect.left - 60;
+    let y = touch.clientY - rect.top - 60;
+
+    const distance = Math.sqrt(x * x + y * y);
+    const max = 40;
+
+    if (distance > max) {
+      x = (x / distance) * max;
+      y = (y / distance) * max;
+    }
+
+    stick.style.left = x + 60 - 20 + "px";
+    stick.style.top = y + 60 - 20 + "px";
+
+    joystick.dx = x / max;
+    joystick.dy = y / max;
+  });
+
+  base.addEventListener("touchend", () => {
+    joystick.active = false;
+    joystick.dx = 0;
+    joystick.dy = 0;
+
+    stick.style.left = "40px";
+    stick.style.top = "40px";
+  });
+
+  showScreen("menuScreen");
+  gameLoop();
+};
 
 window.addEventListener("resize", resizeCanvas);
 
 if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js").then(reg => {
+    console.log("Service Worker Registered");
 
-navigator.serviceWorker.register("service-worker.js").then(reg => {
+    if (reg.waiting) {
+      reg.waiting.postMessage({ type: "SKIP_WAITING" });
+      window.location.reload();
+    }
 
-console.log("Service Worker Registered")
+    reg.addEventListener("updatefound", () => {
+      const newWorker = reg.installing;
 
-// force update if new version exists
-if(reg.waiting){
-reg.waiting.postMessage({type:"SKIP_WAITING"})
-window.location.reload()
-}
-
-reg.addEventListener("updatefound", () => {
-
-const newWorker = reg.installing
-
-newWorker.addEventListener("statechange", () => {
-
-if(newWorker.state === "installed" && navigator.serviceWorker.controller){
-
-// refresh game automatically
-window.location.reload()
-
-}
-
-})
-
-})
-
-})
-
+      newWorker.addEventListener("statechange", () => {
+        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+          window.location.reload();
+        }
+      });
+    });
+  });
 }
