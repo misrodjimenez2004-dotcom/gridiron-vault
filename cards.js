@@ -3,7 +3,7 @@ let cards = [
 {
 name:"Quent Johnson",
 image:"cards/quent_johnson.png",
-total:50,
+total: 50,
 team:"Volt Runners",
 height:"6'3",
 weight:"208 lbs",
@@ -16,7 +16,7 @@ nextSerial: 1
 {
 name:"Jorge Dickens",
 image:"cards/jorge_dickens.png",
-total:50,
+total: 50,
 team:"Lone Star Outlaws",
 height:"6'3",
 weight:"200 lbs",
@@ -29,7 +29,7 @@ nextSerial: 1
 {
 name:"X Flowers",
 image:"cards/x_flowers.png",
-total:50,
+total: 50,
 team:"Shadow Ravens",
 height:"5'9",
 weight:"183 lbs",
@@ -42,7 +42,7 @@ nextSerial: 1
 {
 name:"Erick Stinger Jr.",
 image:"cards/erick_stinger_jr.png",
-total:50,
+total: 50,
 team:"Lone Star Phantoms",
 height:"6'0",
 weight:"195 lbs",
@@ -55,7 +55,7 @@ nextSerial: 1
 {
 name:"William Andson Jr.",
 image:"cards/william_andson_jr.png",
-total:50,
+total: 50,
 team:"Lone Star Phantoms",
 height:"6'4",
 weight:"243 lbs",
@@ -68,7 +68,7 @@ nextSerial: 1
 {
 name:"CD Sheep",
 image:"cards/cd_sheep.png",
-total:50,
+total: 50,
 team:"Lone Star Outlaws",
 height:"6'2",
 weight:"200 lbs",
@@ -81,7 +81,7 @@ nextSerial: 1
 {
 name:"Marv Harry Jr.",
 image:"cards/marv_jr.png",
-total:50,
+total: 50,
 team:"Desert Vultures",
 height:"6'3",
 weight:"220 lbs",
@@ -94,7 +94,7 @@ nextSerial: 1
 {
 name:"Tray Mc",
 image:"cards/tray.png",
-total:50,
+total: 50,
 team:"Desert Vultures",
 height:"6'4",
 weight:"246 lbs",
