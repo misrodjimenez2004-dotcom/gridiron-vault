@@ -166,7 +166,7 @@ function spawnDefender() {
 function updateGame() {
   if (!gameRunning) return;
 
-  fieldScroll += 3
+  fieldScroll += 3 + (yards / 500)
 
   if(fieldScroll >= fieldImage.height){
     fieldScroll = 0
@@ -198,7 +198,7 @@ if (spawnTimer > spawnRate) {
 
   // track the player horizontally
   let dx = player.x - d.x
-  d.x += dx * d.tracking
+  d.x += dx * (d.tracking + distance / 50000)
 
 });
 
@@ -580,29 +580,34 @@ window.onload = function () {
 window.addEventListener("resize", resizeCanvas);
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js")
-  .then(() => console.log("Service Worker Registered"));
+
+navigator.serviceWorker.register("service-worker.js").then(reg => {
+
+console.log("Service Worker Registered")
+
+// force update if new version exists
+if(reg.waiting){
+reg.waiting.postMessage({type:"SKIP_WAITING"})
+window.location.reload()
 }
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js").then(reg => {
+reg.addEventListener("updatefound", () => {
 
-    if (reg.waiting) {
-      reg.waiting.postMessage({ type: "SKIP_WAITING" });
-      window.location.reload();
-    }
+const newWorker = reg.installing
 
-    reg.addEventListener("updatefound", () => {
-      const newWorker = reg.installing;
+newWorker.addEventListener("statechange", () => {
 
-      newWorker.addEventListener("statechange", () => {
-        if (newWorker.state === "installed") {
-          if (navigator.serviceWorker.controller) {
-            window.location.reload();
-          }
-        }
-      });
-    });
+if(newWorker.state === "installed" && navigator.serviceWorker.controller){
 
-  });
+// refresh game automatically
+window.location.reload()
+
+}
+
+})
+
+})
+
+})
+
 }
