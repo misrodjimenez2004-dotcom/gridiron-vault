@@ -1,7 +1,7 @@
 const SUPABASE_URL = "https://rtvfxoqrhypuaktlegcr.supabase.co";
 const SUPABASE_KEY = "sb_publishable_UgxzqZ4oe8M0w2axk3rgOw_VMJaXt5q";
 
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
@@ -88,7 +88,7 @@ function saveGame() {
   const user = localStorage.getItem("gv_user");
 
   if (user) {
-    supabase
+    supabaseClient
       .from("players")
       .update({ coins: coins })
       .eq("id", user);
@@ -513,7 +513,7 @@ async function createAccount() {
     return;
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("players")
     .insert([{
       username: username,
@@ -540,7 +540,7 @@ async function login() {
     return;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("players")
     .select("*")
     .eq("username", username)
