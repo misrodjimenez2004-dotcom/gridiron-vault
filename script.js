@@ -567,8 +567,15 @@ const { data, error } = await supabaseClient
 .eq("password", password)
 .single()
 
-if(error || !data){
-alert("Invalid login")
+console.log("LOGIN RESULT:", data, error)
+
+if(error){
+alert("Login error: " + error.message)
+return
+}
+
+if(!data){
+alert("Invalid username or password")
 return
 }
 
