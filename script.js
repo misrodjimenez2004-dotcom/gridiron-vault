@@ -316,7 +316,7 @@ return
 
 const pulledCards = []
 
-for(let i=0;i<3;i++){
+for(let i=0;i<1;i++){
 
 const { data, error } = await supabaseClient
 .rpc("open_pack",{ player: user })
