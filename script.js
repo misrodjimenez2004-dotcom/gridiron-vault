@@ -346,7 +346,12 @@ card_id: card.id,
 serial: serial
 }])
 
-let cardInfo = cards.find(c => c.id === card.id)
+let cardInfo = cards.find(c => c.name === card.name)
+
+if(!cardInfo){
+console.error("Card not found in cards.js:", card.name)
+continue
+}
 
 let finalCard = {
 ...cardInfo,
@@ -460,7 +465,7 @@ area.innerHTML += `
 <div class="cardInner">
 
 <div class="cardFront">
-<img src="images/cards/${card.card_id}.png">
+<img src="${cards.find(c => c.id === card.card_id)?.image}">
 </div>
 
 <div class="cardBack">
