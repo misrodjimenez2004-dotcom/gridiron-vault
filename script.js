@@ -342,7 +342,7 @@ const { error: insertError } = await supabaseClient
 .from("player_cards")
 .insert([{
 player_id: user,
-card_id: card.id,
+card_id: card.name,
 serial_number: serial
 }])
 
@@ -470,7 +470,7 @@ return
 
 data.forEach(entry => {
 
-let cardInfo = cards.find(c => c.id === entry.card_id)
+let cardInfo = cards.find(c => c.name === entry.card_id)
 
 if(!cardInfo) return
 
