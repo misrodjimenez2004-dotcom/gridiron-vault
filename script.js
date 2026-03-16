@@ -327,7 +327,7 @@ return
 
 const pulledCards = []
 
-for(let i=0;i<3;i++){
+for(let i=0;i<1;i++){
 
 let card = available[Math.floor(Math.random()*available.length)]
 
@@ -343,7 +343,7 @@ const { error: insertError } = await supabaseClient
 .insert([{
 player_id: user,
 card_id: card.id,
-serial: serial
+serial_number: serial
 }])
 
 if(insertError){
@@ -483,7 +483,7 @@ area.innerHTML += `
 </div>
 
 <div class="cardBack">
-<div class="cardSerial">#${entry.serial}</div>
+<div class="cardSerial">#${entry.serial_number}</div>
 </div>
 
 </div>
