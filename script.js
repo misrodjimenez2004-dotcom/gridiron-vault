@@ -307,8 +307,6 @@ function backToMenu() {
 
 async function openPack(){
 
-document.getElementById("packArea").style.display = "none"
-
 let user = localStorage.getItem("gv_user")
 
 if(!user){
@@ -316,62 +314,30 @@ alert("You must login first")
 return
 }
 
-const { data: available } = await supabaseClient
-.from("cards")
-.select("*")
+const pulledCards = []
 
-if(!available || available.length === 0){
-alert("No cards available")
+for(let i=0;i<3;i++){
+
+const { data, error } = await supabaseClient
+.rpc("open_pack",{ player: user })
+
+if(error){
+console.error(error)
+alert("Pack error")
 return
 }
 
-const pulledCards = []
+const card = data[0]
 
-for(let i=0;i<1;i++){
-
-let card = available[Math.floor(Math.random()*available.length)]
-
-let serial = card.next_serial
-
-await supabaseClient
-.from("cards")
-.update({next_serial: serial + 1})
-.eq("id", card.id)
-
-const { error: insertError } = await supabaseClient
-.from("player_cards")
-.insert([{
-player_id: user,
-card_id: card.name,
-serial_number: serial
-}])
-
-if(insertError){
-console.error("PLAYER CARD INSERT ERROR:", insertError)
-alert("Card save failed: " + insertError.message)
-}
-
-let cardInfo = cards.find(c => c.name === card.name)
-
-if(!cardInfo){
-console.error("Card not found in cards.js:", card.name)
-continue
-}
-
-let finalCard = {
-...cardInfo,
-serial: serial
-}
-
-pulledCards.push(finalCard)
-playerCards.push(finalCard)
+pulledCards.push({
+name: card.name,
+image: card.image,
+serial: card.serial
+})
 
 }
 
 revealCards(pulledCards)
-await loadPlayerCards()
-showCollection()
-saveGame()
 
 }
 
@@ -452,16 +418,17 @@ let user = localStorage.getItem("gv_user")
 
 const { data, error } = await supabaseClient
 .from("player_cards")
-.select("serial, card_id")
+.select(`
+serial_number,
+cards (
+image,
+name
+)
+`)
 .eq("player_id", user)
 
 const area = document.getElementById("collectionList")
 area.innerHTML = ""
-
-if(error){
-console.error(error)
-return
-}
 
 if(!data || data.length === 0){
 area.innerHTML = "<p>No cards yet</p>"
@@ -470,16 +437,12 @@ return
 
 data.forEach(entry => {
 
-let cardInfo = cards.find(c => c.name === entry.card_id)
-
-if(!cardInfo) return
-
 area.innerHTML += `
 <div class="collectionCard">
 <div class="cardInner">
 
 <div class="cardFront">
-<img src="${cardInfo.image}">
+<img src="${entry.cards.image}">
 </div>
 
 <div class="cardBack">
