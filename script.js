@@ -338,8 +338,10 @@ card_id: card.id,
 serial: serial
 }])
 
+let cardInfo = cards.find(c => c.name === card.name)
+
 pulledCards.push({
-...card,
+...cardInfo,
 serial: serial
 })
 
