@@ -124,6 +124,14 @@ function loadGame() {
   updateCoins();
 }
 
+function assignCardIDs(){
+
+cards.forEach((card, index) => {
+card.id = index + 1
+})
+
+}
+
 function preloadImages() {
   cards.forEach(card => {
     const img = new Image();
@@ -338,7 +346,7 @@ card_id: card.id,
 serial: serial
 }])
 
-let cardInfo = cards.find(c => c.name === card.name)
+let cardInfo = cards.find(c => c.id === card.id)
 
 let finalCard = {
 ...cardInfo,
@@ -352,6 +360,7 @@ playerCards.push(finalCard)
 
 revealCards(pulledCards)
 await loadPlayerCards()
+showCollection()
 saveGame()
 
 }
@@ -599,6 +608,7 @@ window.onload = function () {
     return;
   }
 
+  assignCardIDs();
   preloadImages();
   loadGame();
 
