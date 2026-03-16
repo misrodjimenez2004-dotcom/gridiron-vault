@@ -445,31 +445,40 @@ async function showCollection(){
 
 let user = localStorage.getItem("gv_user")
 
-const { data } = await supabaseClient
+const { data, error } = await supabaseClient
 .from("player_cards")
-.select("*")
+.select("serial, card_id")
 .eq("player_id", user)
 
 const area = document.getElementById("collectionList")
 area.innerHTML = ""
+
+if(error){
+console.error(error)
+return
+}
 
 if(!data || data.length === 0){
 area.innerHTML = "<p>No cards yet</p>"
 return
 }
 
-data.forEach(card => {
+data.forEach(entry => {
+
+let cardInfo = cards.find(c => c.id === entry.card_id)
+
+if(!cardInfo) return
 
 area.innerHTML += `
 <div class="collectionCard">
 <div class="cardInner">
 
 <div class="cardFront">
-<img src="${cards.find(c => c.id === card.card_id)?.image}">
+<img src="${cardInfo.image}">
 </div>
 
 <div class="cardBack">
-<div class="cardSerial">#${card.serial}</div>
+<div class="cardSerial">#${entry.serial}</div>
 </div>
 
 </div>
