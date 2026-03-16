@@ -717,7 +717,7 @@ if(!user) return
 
 const { data, error } = await supabaseClient
 .from("player_cards")
-.select("serial, card_id")
+.select("serial_number, card_id")
 .eq("player_id", user)
 
 if(error){
