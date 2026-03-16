@@ -338,13 +338,18 @@ await supabaseClient
 .update({next_serial: serial + 1})
 .eq("id", card.id)
 
-await supabaseClient
+const { error: insertError } = await supabaseClient
 .from("player_cards")
 .insert([{
 player_id: user,
 card_id: card.id,
 serial: serial
 }])
+
+if(insertError){
+console.error("PLAYER CARD INSERT ERROR:", insertError)
+alert("Card save failed: " + insertError.message)
+}
 
 let cardInfo = cards.find(c => c.name === card.name)
 
