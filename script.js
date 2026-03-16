@@ -555,43 +555,32 @@ async function createAccount() {
   showScreen("menuScreen");
 }
 
-async function login() {
-  const username = document.getElementById("usernameInput").value.trim();
-  const password = document.getElementById("passwordInput").value.trim();
+async function login(){
 
-  if (!username || !password) {
-    alert("Enter username and password");
-    return;
-  }
+let username = document.getElementById("usernameInput").value
+let password = document.getElementById("passwordInput").value
 
-  const { data, error } = await supabaseClient
-    .from("players")
-    .select("*")
-    .eq("username", username)
-    .eq("password_hash", password)
-    .single();
+const { data, error } = await supabaseClient
+.from("players")
+.select("*")
+.eq("username", username)
+.eq("password", password)
+.single()
 
-  if (error || !data) {
-    console.error(error);
-    alert("Invalid login");
-    return;
-  }
+if(error || !data){
+alert("Invalid login")
+return
+}
 
-  // save user id
 localStorage.setItem("gv_user", data.id)
 
-// clear old device saves
-localStorage.removeItem("gv_cards")
-localStorage.removeItem("gv_coins")
-
-// load account coins
 coins = data.coins || 0
-playerCards = []
-
 updateCoins()
 
 await loadPlayerCards()
+
 showScreen("menuScreen")
+
 }
 
 window.onload = function () {
@@ -694,24 +683,30 @@ let user = localStorage.getItem("gv_user")
 
 if(!user) return
 
-const { data } = await supabaseClient
+const { data, error } = await supabaseClient
 .from("player_cards")
-.select(`
-serial,
-cards (*)
-`)
+.select("serial, card_id")
 .eq("player_id", user)
+
+if(error){
+console.error(error)
+return
+}
 
 playerCards = []
 
 for(const entry of data){
 
-let cardInfo = cards.find(c => c.name === entry.cards.name)
+let cardInfo = cards.find(c => c.id === entry.card_id)
+
+if(cardInfo){
 
 playerCards.push({
 ...cardInfo,
 serial: entry.serial
 })
+
+}
 
 }
 
