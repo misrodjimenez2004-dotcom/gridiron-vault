@@ -680,20 +680,3 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-async function uploadCardsToDatabase(){
-
-for(const card of cards){
-
-await supabaseClient
-.from("cards")
-.insert([{
-name: card.name,
-total_supply: card.total,
-next_serial: 1
-}])
-
-}
-
-console.log("Cards uploaded")
-
-}
