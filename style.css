@@ -366,3 +366,12 @@ vertical-align:middle;
 margin:0 4px;
 object-fit:contain;
 }
+
+.cardInner{
+transition: transform .4s;
+transform-style: preserve-3d;
+}
+
+.collectionCard.flipped .cardInner{
+transform: rotateY(180deg);
+}

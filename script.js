@@ -444,10 +444,10 @@ area.innerHTML = "<p>No cards yet</p>"
 return
 }
 
-data.forEach(entry => {
+data.forEach((entry,index) => {
 
 area.innerHTML += `
-<div class="collectionCard">
+<div class="collectionCard" id="card${index}">
 <div class="cardInner">
 
 <div class="cardFront">
@@ -464,37 +464,61 @@ area.innerHTML += `
 
 })
 
+setTimeout(()=>{
+
+data.forEach((entry,index)=>{
+
+let element = document.getElementById("card"+index)
+
+handleCardTouch(element,{
+image: entry.cards.image,
+name: entry.cards.name,
+serial: entry.serial_number
+})
+
+})
+
+},50)
+
 }
 
-function startPress(e, index) {
-  longPressTriggered = false;
+let lastTapTime = 0;
 
-  pressTimer = setTimeout(() => {
-    longPressTriggered = true;
-    inspectCard(playerCards[index]);
-  }, 500);
+function handleCardTouch(cardElement, cardData){
+
+let pressTimer = null
+let longPress = false
+
+cardElement.addEventListener("touchstart", e => {
+
+pressTimer = setTimeout(()=>{
+longPress = true
+inspectCard(cardData)
+},600)
+
+})
+
+cardElement.addEventListener("touchend", e => {
+
+clearTimeout(pressTimer)
+
+if(longPress){
+longPress = false
+return
 }
 
-function endPress(e, index) {
-  clearTimeout(pressTimer);
+const now = Date.now()
 
-  if (longPressTriggered) {
-    longPressTriggered = false;
-    return;
-  }
+if(now - lastTapTime < 300){
 
-  flipCollectionCard(index);
+cardElement.classList.toggle("flipped")
+
 }
 
-function flipCollectionCard(index) {
-  const card = document.getElementById("cardInner" + index);
-  if (card) {
-    card.classList.toggle("flipped");
-  }
-}
+lastTapTime = now
 
-function cancelPress() {
-  clearTimeout(pressTimer);
+})
+
 }
 
 function inspectCard(card) {
