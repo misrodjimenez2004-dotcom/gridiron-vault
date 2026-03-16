@@ -340,14 +340,18 @@ serial: serial
 
 let cardInfo = cards.find(c => c.name === card.name)
 
-pulledCards.push({
+let finalCard = {
 ...cardInfo,
 serial: serial
-})
+}
+
+pulledCards.push(finalCard)
+playerCards.push(finalCard)
 
 }
 
 revealCards(pulledCards)
+saveGame()
 
 }
 
