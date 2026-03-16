@@ -351,6 +351,7 @@ playerCards.push(finalCard)
 }
 
 revealCards(pulledCards)
+await loadPlayerCards()
 saveGame()
 
 }
@@ -589,6 +590,7 @@ playerCards = []
 
 updateCoins()
 
+await loadPlayerCards()
 showScreen("menuScreen")
 }
 
@@ -686,3 +688,31 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+async function loadPlayerCards(){
+
+let user = localStorage.getItem("gv_user")
+
+if(!user) return
+
+const { data } = await supabaseClient
+.from("player_cards")
+.select(`
+serial,
+cards (*)
+`)
+.eq("player_id", user)
+
+playerCards = []
+
+for(const entry of data){
+
+let cardInfo = cards.find(c => c.name === entry.cards.name)
+
+playerCards.push({
+...cardInfo,
+serial: entry.serial
+})
+
+}
+
+}
