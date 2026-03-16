@@ -517,7 +517,7 @@ async function createAccount() {
     .from("players")
     .insert([{
       username: username,
-      password: password,
+      password_hash: password,
       coins: 0
     }]);
 
@@ -544,7 +544,7 @@ async function login() {
     .from("players")
     .select("*")
     .eq("username", username)
-    .eq("password", password)
+    .eq("password_hash", password)
     .single();
 
   if (error || !data) {
