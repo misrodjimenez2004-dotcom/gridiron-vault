@@ -337,6 +337,15 @@ serial: card.serial
 
 }
 
+// hide pack
+document.getElementById("packArea").style.display = "none"
+
+// reset result area
+const result = document.getElementById("packResult")
+result.innerHTML = ""
+result.style.display = "block"
+
+// reveal cards
 revealCards(pulledCards)
 
 }
