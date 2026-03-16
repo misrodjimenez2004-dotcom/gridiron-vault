@@ -564,7 +564,7 @@ const { data, error } = await supabaseClient
 .from("players")
 .select("*")
 .eq("username", username)
-.eq("password", password)
+.eq("password_hash", password)
 .single()
 
 console.log("LOGIN RESULT:", data, error)
