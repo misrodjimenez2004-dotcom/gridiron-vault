@@ -297,34 +297,56 @@ function backToMenu() {
   showScreen("menuScreen");
 }
 
-function openPack() {
-  document.getElementById("packArea").style.display = "none";
+async function openPack(){
 
-  const available = cards.filter(c => c.nextSerial <= c.total);
+document.getElementById("packArea").style.display = "none"
 
-  if (available.length === 0) {
-    alert("All cards pulled");
-    return;
-  }
+let user = localStorage.getItem("gv_user")
 
-  const pulledCards = [];
+if(!user){
+alert("You must login first")
+return
+}
 
-  for (let i = 0; i < 3; i++) {
-    const card = available[Math.floor(Math.random() * available.length)];
-    const serial = card.nextSerial;
-    card.nextSerial++;
+const { data: available } = await supabaseClient
+.from("cards")
+.select("*")
 
-    const pulledCard = {
-      ...card,
-      serial: serial
-    };
+if(!available || available.length === 0){
+alert("No cards available")
+return
+}
 
-    pulledCards.push(pulledCard);
-    playerCards.push(pulledCard);
-  }
+const pulledCards = []
 
-  revealCards(pulledCards);
-  saveGame();
+for(let i=0;i<3;i++){
+
+let card = available[Math.floor(Math.random()*available.length)]
+
+let serial = card.next_serial
+
+await supabaseClient
+.from("cards")
+.update({next_serial: serial + 1})
+.eq("id", card.id)
+
+await supabaseClient
+.from("player_cards")
+.insert([{
+player_id: user,
+card_id: card.id,
+serial: serial
+}])
+
+pulledCards.push({
+...card,
+serial: serial
+})
+
+}
+
+revealCards(pulledCards)
+
 }
 
 let coinAnimation = null;
@@ -398,48 +420,43 @@ function openCollection() {
   showScreen("collectionScreen");
 }
 
-function showCollection() {
-  const area = document.getElementById("collectionList");
-  area.innerHTML = "";
+async function showCollection(){
 
-  if (playerCards.length === 0) {
-    area.innerHTML = "<p>No cards yet</p>";
-    return;
-  }
+let user = localStorage.getItem("gv_user")
 
-  playerCards.forEach((card, index) => {
-    area.innerHTML += `
-      <div class="collectionCard"
-           ontouchstart="startPress(event, ${index})"
-           ontouchend="endPress(event, ${index})"
-           ontouchmove="cancelPress()">
+const { data } = await supabaseClient
+.from("player_cards")
+.select("*")
+.eq("player_id", user)
 
-        <div class="cardInner" id="cardInner${index}">
-          <div class="cardFront">
-            <img src="${card.image}">
-          </div>
+const area = document.getElementById("collectionList")
+area.innerHTML = ""
 
-          <div class="cardBack">
-            <div class="cardHeader">
-              <span class="teamName">${card.team}</span>
-              <img class="teamLogo" src="${card.logo}">
-            </div>
+if(!data || data.length === 0){
+area.innerHTML = "<p>No cards yet</p>"
+return
+}
 
-            <div class="cardStats">
-              <h4>${card.name}</h4>
-              <p>Height: ${card.height}</p>
-              <p>Weight: ${card.weight}</p>
-              <p>Position: ${card.position}</p>
-              <p>College: ${card.college}</p>
-            </div>
+data.forEach(card => {
 
-            <div class="cardSet">${card.set}</div>
-            <div class="cardSerial">#${card.serial} / ${card.total}</div>
-          </div>
-        </div>
-      </div>
-    `;
-  });
+area.innerHTML += `
+<div class="collectionCard">
+<div class="cardInner">
+
+<div class="cardFront">
+<img src="images/cards/${card.card_id}.png">
+</div>
+
+<div class="cardBack">
+<div class="cardSerial">#${card.serial}</div>
+</div>
+
+</div>
+</div>
+`
+
+})
+
 }
 
 function startPress(e, index) {
@@ -553,11 +570,20 @@ async function login() {
     return;
   }
 
-  localStorage.setItem("gv_user", data.id);
-  coins = data.coins || 0;
-  updateCoins();
+  // save user id
+localStorage.setItem("gv_user", data.id)
 
-  showScreen("menuScreen");
+// clear old device saves
+localStorage.removeItem("gv_cards")
+localStorage.removeItem("gv_coins")
+
+// load account coins
+coins = data.coins || 0
+playerCards = []
+
+updateCoins()
+
+showScreen("menuScreen")
 }
 
 window.onload = function () {
