@@ -17,7 +17,7 @@ let gameRunning = false;
 let yards = 0;
 let pressTimer = null;
 let fieldScroll = 0;
-let packPrice = 200;
+let packPrice = 0;
 let longPressTriggered = false;
 
 let fieldImage = new Image();
