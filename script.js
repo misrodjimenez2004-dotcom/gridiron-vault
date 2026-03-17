@@ -780,23 +780,16 @@ async function loadFriends(){
 let user = localStorage.getItem("gv_user")
 if(!user) return
 
-const { data, error } = await supabaseClient
-.from("friends")
-.select(`
-friend_id,
-players (
-username
-)
-`)
-.eq("player_id", user)
-
-console.log("FRIENDS DATA:", data, error)
-
 const list = document.getElementById("friendsList")
 list.innerHTML = ""
 
+const { data, error } = await supabaseClient
+.from("friends")
+.select("friend_id")
+.eq("player_id", user)
+
 if(error){
-console.error(error)
+console.error("LOAD FRIENDS ERROR:", error)
 list.innerHTML = "<p>Error loading friends</p>"
 return
 }
@@ -806,9 +799,20 @@ list.innerHTML = "<p>No friends yet</p>"
 return
 }
 
-data.forEach(f => {
-list.innerHTML += `<p>${f.players.username}</p>`
-})
+// now fetch usernames manually
+for(const f of data){
+
+const { data: player } = await supabaseClient
+.from("players")
+.select("username")
+.eq("id", f.friend_id)
+.single()
+
+if(player){
+list.innerHTML += `<p>${player.username}</p>`
+}
+
+}
 
 }
 
