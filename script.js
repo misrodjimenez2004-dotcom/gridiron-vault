@@ -725,6 +725,87 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+async function addFriend(){
+
+let username = document.getElementById("friendInput").value
+let user = localStorage.getItem("gv_user")
+
+if(!username){
+alert("Enter a username")
+return
+}
+
+// find player
+const { data: friend, error } = await supabaseClient
+.from("players")
+.select("*")
+.eq("username", username)
+.single()
+
+if(error || !friend){
+alert("User not found")
+return
+}
+
+// prevent adding yourself
+if(friend.id === user){
+alert("You can't add yourself")
+return
+}
+
+// insert friend
+const { error: insertError } = await supabaseClient
+.from("friends")
+.insert([{
+player_id: user,
+friend_id: friend.id
+}])
+
+if(insertError){
+console.error(insertError)
+alert("Already added or error")
+return
+}
+
+alert("Friend added!")
+
+loadFriends()
+
+}
+
+async function loadFriends(){
+
+let user = localStorage.getItem("gv_user")
+
+const { data, error } = await supabaseClient
+.from("friends")
+.select(`
+friend_id,
+players!friends_friend_id_fkey (
+username
+)
+`)
+.eq("player_id", user)
+
+if(error){
+console.error(error)
+return
+}
+
+const list = document.getElementById("friendsList")
+list.innerHTML = ""
+
+if(!data || data.length === 0){
+list.innerHTML = "<p>No friends yet</p>"
+return
+}
+
+data.forEach(f => {
+list.innerHTML += `<p>${f.players.username}</p>`
+})
+
+}
+
 async function loadPlayerCards(){
 
 let user = localStorage.getItem("gv_user")

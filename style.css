@@ -409,3 +409,19 @@ transform:scale(0.95);
   height:40px;
   image-rendering:pixelated;
 }
+
+#friendInput{
+  padding:10px;
+  margin:10px 0;
+  width:200px;
+}
+
+#friendsList{
+  margin-top:10px;
+}
+
+#friendsList p{
+  background:#1a1a1a;
+  padding:8px;
+  border-radius:6px;
+}
