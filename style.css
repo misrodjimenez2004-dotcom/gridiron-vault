@@ -329,30 +329,6 @@ button {
   margin-top: 20px;
 }
 
-.coinDisplay{
-display:flex;
-align-items:center;
-justify-content:center;
-gap:8px;
-font-size:22px;
-margin-bottom:10px;
-}
-
-.coinIcon{
-height:2.7em;
-width:auto;
-image-rendering: pixelated;
-}
-
-.coinDisplay{
-display:flex;
-align-items:center;
-justify-content:center;
-gap:10px;
-font-size:26px;
-font-weight:bold;
-}
-
 .packPrice{
 font-size:16px;
 opacity:0.9;
@@ -398,23 +374,38 @@ html, body {
   margin-bottom:5px;
 }
 
-#profileBtn img{
-width:100%;
-height:100%;
-}
-
 #profileBtn:active{
 transform:scale(0.95);
 }
 
 #menuContainer{
-position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding-top:40px;
+}
+
+#menuContainer h1{
+  margin:0 0 20px 0;
 }
 
 #profileBtn{
-position:absolute;
-top:70px;     /* adjust up/down */
-left:10px;    /* adjust left/right */
-width:160px;
-z-index:5;
+  display:block;
+  width:180px;
+  margin:0 0 20px 0;
+}
+
+.coinDisplay{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:30px;
+}
+
+.coinIcon{
+  width:40px;
+  height:40px;
+  image-rendering:pixelated;
 }

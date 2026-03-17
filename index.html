@@ -26,23 +26,21 @@
 
 </div>
 
-<div id="menuContainer">
+<div id="menuScreen" class="screen">
+  <div id="menuContainer">
+    <h1>GRIDIRON VAULT</h1>
 
-  <h1>GRIDIRON VAULT</h1>
+    <img id="profileBtn" src="images/profile-button.png">
 
-  <img id="profileBtn" src="images/profile-button.png">
+    <div class="coinDisplay">
+      <img src="images/coin.png" class="coinIcon">
+      <p id="coins">0</p>
+    </div>
 
-  <div id="coinDisplay">
-    <img src="images/coin.png">
-    <span id="coins">0</span>
+    <button onclick="startGame()">PLAY</button>
+    <button onclick="showPackScreen()">OPEN PACK</button>
+    <button onclick="openCollection()">COLLECTION</button>
   </div>
-
-  <div class="menuButtons">
-    <button>PLAY</button>
-    <button>OPEN PACK</button>
-    <button>COLLECTION</button>
-  </div>
-
 </div>
 
 <div id="profileScreen" class="screen">
