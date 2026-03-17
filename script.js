@@ -430,8 +430,15 @@ const { data, error } = await supabaseClient
 .select(`
 serial_number,
 cards (
+name,
 image,
-name
+team,
+height,
+weight,
+position,
+set,
+logo,
+college
 )
 `)
 .eq("player_id", user)
@@ -455,7 +462,15 @@ area.innerHTML += `
 </div>
 
 <div class="cardBack">
-<div class="cardSerial">#${entry.serial_number}</div>
+  <img src="${entry.cards.logo}" class="cardLogo">
+  <div class="cardName">${entry.cards.name}</div>
+  <div>Team: ${entry.cards.team}</div>
+  <div>Height: ${entry.cards.height}</div>
+  <div>Weight: ${entry.cards.weight}</div>
+  <div>Position: ${entry.cards.position}</div>
+  <div>College: ${entry.cards.college}</div>
+  <div>Set: ${entry.cards.set}</div>
+  <div class="cardSerial">#${entry.serial_number}</div>
 </div>
 
 </div>
@@ -471,8 +486,7 @@ data.forEach((entry,index)=>{
 let element = document.getElementById("card"+index)
 
 handleCardTouch(element,{
-image: entry.cards.image,
-name: entry.cards.name,
+...entry.cards,
 serial: entry.serial_number
 })
 
@@ -500,6 +514,8 @@ inspectCard(cardData)
 
 cardElement.addEventListener("touchend", e => {
 
+e.preventDefault()  // 🔥 THIS STOPS iOS ZOOM
+
 clearTimeout(pressTimer)
 
 if(longPress){
@@ -510,9 +526,7 @@ return
 const now = Date.now()
 
 if(now - lastTapTime < 300){
-
 cardElement.classList.toggle("flipped")
-
 }
 
 lastTapTime = now
