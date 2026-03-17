@@ -437,3 +437,17 @@ transform:scale(0.95);
   from{opacity:1;}
   to{opacity:0.6;}
 }
+
+.screen{
+  display:none;
+  width:100%;
+  height:100vh;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  flex-direction:column;
+}
+
+.screen.active{
+  display:flex;
+}

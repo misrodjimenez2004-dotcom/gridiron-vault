@@ -53,11 +53,11 @@ let joystick = {
 
 function showScreen(screen) {
   document.querySelectorAll(".screen").forEach(s => {
-    s.style.display = "none";
+    s.classList.remove("active")
   });
 
   const target = document.getElementById(screen);
-  if (target) target.style.display = "block";
+  if (target) target.classList.add("active");
 
   if (screen === "gameScreen") {
     base.style.display = "block";
@@ -65,9 +65,12 @@ function showScreen(screen) {
     base.style.display = "none";
   }
 
-  if(screen === "slotsScreen"){
-  document.getElementById("slotsCoins").innerText = coins
-}
+  // update coins everywhere
+  document.getElementById("coins").innerText = coins
+
+  if(document.getElementById("slotsCoins")){
+    document.getElementById("slotsCoins").innerText = coins
+  }
 }
 
 function spinSlots(){
@@ -78,8 +81,15 @@ return
 }
 
 coins -= 20
+updateCoins()
+
+document.getElementById("slotsCoins").innerText = coins
 
 const symbols = ["🏈","🏆","🔥","💎"]
+
+let spins = 0
+
+const spinInterval = setInterval(() => {
 
 let s1 = symbols[Math.floor(Math.random()*symbols.length)]
 let s2 = symbols[Math.floor(Math.random()*symbols.length)]
@@ -87,6 +97,13 @@ let s3 = symbols[Math.floor(Math.random()*symbols.length)]
 
 document.getElementById("slotDisplay").innerText = `${s1} | ${s2} | ${s3}`
 
+spins++
+
+if(spins > 10){
+
+clearInterval(spinInterval)
+
+// FINAL RESULT
 let reward = 0
 let resultText = "❌ You lost!"
 
@@ -116,7 +133,13 @@ coins += reward
 document.getElementById("slotResult").innerText = resultText + " +" + reward
 
 updateCoins()
+document.getElementById("slotsCoins").innerText = coins
+
 saveGame()
+
+}
+
+}, 100)
 
 }
 
