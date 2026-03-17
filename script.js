@@ -745,29 +745,30 @@ document.getElementById("profileCoins").innerText = "Coins: " + coinsStored
 }
 
 window.onload = function () {
+
+  // ✅ FIRST: grab ALL DOM elements
+  canvas = document.getElementById("gameCanvas");
+  ctx = canvas.getContext("2d");
+
+  base = document.getElementById("joystickBase");
+  stick = document.getElementById("joystickStick");
+
+  ctx.imageSmoothingEnabled = false;
+
+  // ✅ THEN run setup
   resizeCanvas();
   checkGameVersion();
   loadGame();
   loadProfile();
 
-   canvas = document.getElementById("gameCanvas");
-ctx = canvas.getContext("2d");
-
-ctx.imageSmoothingEnabled = false;
-
-base = document.getElementById("joystickBase");
-stick = document.getElementById("joystickStick");
-
-  // 🔥 CRITICAL FIX — hide ALL screens first
+  // hide all screens
   document.querySelectorAll(".screen").forEach(s => {
     s.classList.remove("active");
   });
 
-  // 🔥 show ONLY login screen
   showScreen("loginScreen");
 
-  const pack = document.getElementById("packImage");
-
+  // profile button
   const profileBtn = document.getElementById("profileBtn");
   if (profileBtn) {
     profileBtn.onclick = () => {
@@ -775,6 +776,8 @@ stick = document.getElementById("joystickStick");
     };
   }
 
+  // pack swipe
+  const pack = document.getElementById("packImage");
   if (pack) {
     pack.addEventListener("touchstart", e => {
       startX = e.touches[0].clientX;
@@ -791,43 +794,49 @@ stick = document.getElementById("joystickStick");
     });
   }
 
-  base.addEventListener("touchstart", e => {
-    e.preventDefault();
-    joystick.active = true;
-  });
+  // 🎮 JOYSTICK (SAFE NOW)
+  if (base && stick) {
 
-  base.addEventListener("touchmove", e => {
-    e.preventDefault();
+    base.addEventListener("touchstart", e => {
+      e.preventDefault();
+      joystick.active = true;
+    });
 
-    const rect = base.getBoundingClientRect();
-    const touch = e.touches[0];
+    base.addEventListener("touchmove", e => {
+      e.preventDefault();
 
-    let x = touch.clientX - rect.left - 60;
-    let y = touch.clientY - rect.top - 60;
+      const rect = base.getBoundingClientRect();
+      const touch = e.touches[0];
 
-    const distance = Math.sqrt(x * x + y * y);
-    const max = 40;
+      let x = touch.clientX - rect.left - 60;
+      let y = touch.clientY - rect.top - 60;
 
-    if (distance > max) {
-      x = (x / distance) * max;
-      y = (y / distance) * max;
-    }
+      const distance = Math.sqrt(x * x + y * y);
+      const max = 40;
 
-    stick.style.left = x + 60 - 20 + "px";
-    stick.style.top = y + 60 - 20 + "px";
+      if (distance > max) {
+        x = (x / distance) * max;
+        y = (y / distance) * max;
+      }
 
-    joystick.dx = x / max;
-    joystick.dy = y / max;
-  });
+      stick.style.left = x + 60 - 20 + "px";
+      stick.style.top = y + 60 - 20 + "px";
 
-  base.addEventListener("touchend", () => {
-    joystick.active = false;
-    joystick.dx = 0;
-    joystick.dy = 0;
-    stick.style.left = "40px";
-    stick.style.top = "40px";
-  });
+      joystick.dx = x / max;
+      joystick.dy = y / max;
+    });
 
+    base.addEventListener("touchend", () => {
+      joystick.active = false;
+      joystick.dx = 0;
+      joystick.dy = 0;
+      stick.style.left = "40px";
+      stick.style.top = "40px";
+    });
+
+  }
+
+  // start loop LAST
   gameLoop();
 };
 
