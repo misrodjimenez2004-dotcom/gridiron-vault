@@ -18,6 +18,8 @@ let fieldScroll = 0;
 let packPrice = 0;
 let canvas;
 let ctx;
+let base;
+let stick;
 
 let fieldImage = new Image();
 fieldImage.src = "images/field.png";
@@ -30,11 +32,6 @@ defenderSprite.src = "images/defender.png";
 
 const cardBack = new Image();
 cardBack.src = "images/card-back.png";
-
-ctx.imageSmoothingEnabled = false;
-
-const base = document.getElementById("joystickBase");
-const stick = document.getElementById("joystickStick");
 
 const GAME_VERSION = "1.3";
 
@@ -319,6 +316,7 @@ function updateGame() {
 }
 
 function drawGame() {
+  if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // 🧪 BACKUP (so screen is NEVER blank)
@@ -752,11 +750,13 @@ window.onload = function () {
   loadGame();
   loadProfile();
 
-   const canvas = document.getElementById("gameCanvas");
-  window.canvas = canvas;
-  window.ctx = canvas.getContext("2d");
+   canvas = document.getElementById("gameCanvas");
+ctx = canvas.getContext("2d");
 
-  ctx.imageSmoothingEnabled = false;
+ctx.imageSmoothingEnabled = false;
+
+base = document.getElementById("joystickBase");
+stick = document.getElementById("joystickStick");
 
   // 🔥 CRITICAL FIX — hide ALL screens first
   document.querySelectorAll(".screen").forEach(s => {
