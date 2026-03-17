@@ -16,10 +16,10 @@ let gameRunning = false;
 let yards = 0;
 let fieldScroll = 0;
 let packPrice = 0;
-let canvas;
-let ctx;
-let base;
-let stick;
+let canvas = null;
+let ctx = null;
+let base = null;
+let stick = null;
 
 let fieldImage = new Image();
 fieldImage.src = "images/field.png";
@@ -50,35 +50,34 @@ let joystick = {
 
 function showScreen(screen) {
   document.querySelectorAll(".screen").forEach(s => {
-    s.classList.remove("active")
+    s.classList.remove("active");
   });
 
   const target = document.getElementById(screen);
   if (target) target.classList.add("active");
 
-  if (screen === "gameScreen") {
-  base.style.display = "block";
-
-  // 🔥 IMPORTANT FIX
-  setTimeout(() => {
-    resizeCanvas();
-
-    // reset player position so it’s visible
-    player.x = canvas.width / 2;
-    player.y = canvas.height - 120;
-  }, 50);
-
-} else {
-  base.style.display = "none";
-}
-
-  // update coins everywhere
-  if(document.getElementById("coins")){
-  document.getElementById("coins").innerText = coins
+  if (base) {
+    base.style.display = screen === "gameScreen" ? "block" : "none";
   }
 
-  if(document.getElementById("slotsCoins")){
-    document.getElementById("slotsCoins").innerText = coins
+  if (document.getElementById("coins")) {
+    document.getElementById("coins").innerText = coins;
+  }
+
+  if (document.getElementById("slotsCoins")) {
+    document.getElementById("slotsCoins").innerText = coins;
+  }
+
+  if (document.getElementById("profileCoins")) {
+    document.getElementById("profileCoins").innerText = "Coins: " + coins;
+  }
+
+  if (screen === "gameScreen") {
+    requestAnimationFrame(() => {
+      resizeCanvas();
+      player.x = canvas.width / 2;
+      player.y = canvas.height - 120;
+    });
   }
 }
 
@@ -153,10 +152,14 @@ saveGame()
 }
 
 function resizeCanvas() {
-  const maxWidth = window.innerWidth;
-  const maxHeight = window.innerHeight - 120;
-  canvas.width = maxWidth;
-  canvas.height = maxHeight;
+  if (!canvas) return;
+
+  const container = document.getElementById("gameContainer");
+  const width = container ? container.clientWidth : window.innerWidth;
+  const height = window.innerHeight;
+
+  canvas.width = width;
+  canvas.height = height;
 }
 
 function updateCoins() {
@@ -207,27 +210,29 @@ function loadGame() {
 
 function startGame() {
   showScreen("gameScreen");
+  resizeCanvas();
 
-  setTimeout(() => {
-    resizeCanvas();
+  gameRunning = true;
+  defenders = [];
+  spawnTimer = 0;
+  yards = 0;
+  fieldScroll = 0;
 
-    gameRunning = true;
-    defenders = [];
-    spawnTimer = 0;
-    yards = 0;
-    fieldScroll = 0;
+  player.x = canvas.width / 2;
+  player.y = canvas.height - 120;
 
-    player.x = canvas.width / 2;
-    player.y = canvas.height - 120;
+  joystick.dx = 0;
+  joystick.dy = 0;
 
-    joystick.dx = 0;
-    joystick.dy = 0;
-
+  if (stick) {
     stick.style.left = "40px";
     stick.style.top = "40px";
+  }
 
-    document.getElementById("yardScore").innerText = "Yards: 0";
-  }, 50);
+  const yardScore = document.getElementById("yardScore");
+  if (yardScore) {
+    yardScore.innerText = "Yards: 0";
+  }
 }
 
 async function gameOver() {
@@ -316,21 +321,20 @@ function updateGame() {
 }
 
 function drawGame() {
-  if (!ctx) return;
+  if (!ctx || !canvas) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 🧪 BACKUP (so screen is NEVER blank)
+  // fallback background so screen is never blank
   ctx.fillStyle = "#0a5f2c";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // draw field if loaded
-  if (fieldImage.complete) {
+  if (fieldImage.complete && fieldImage.naturalWidth > 0) {
     ctx.drawImage(fieldImage, 0, fieldScroll, canvas.width, fieldImage.height);
     ctx.drawImage(fieldImage, 0, fieldScroll - fieldImage.height, canvas.width, fieldImage.height);
   }
 
-  // draw player (fallback circle if image not loaded)
-  if (runnerSprite.complete) {
+  if (runnerSprite.complete && runnerSprite.naturalWidth > 0) {
     const size = 120;
     ctx.drawImage(
       runnerSprite,
@@ -342,13 +346,12 @@ function drawGame() {
   } else {
     ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.arc(player.x, player.y, 15, 0, Math.PI * 2);
+    ctx.arc(player.x, player.y, 18, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // draw defenders
   defenders.forEach(d => {
-    if (defenderSprite.complete) {
+    if (defenderSprite.complete && defenderSprite.naturalWidth > 0) {
       const size = 160;
       ctx.drawImage(
         defenderSprite,
@@ -360,7 +363,7 @@ function drawGame() {
     } else {
       ctx.fillStyle = "red";
       ctx.beginPath();
-      ctx.arc(d.x, d.y, 15, 0, Math.PI * 2);
+      ctx.arc(d.x, d.y, 18, 0, Math.PI * 2);
       ctx.fill();
     }
   });
@@ -389,9 +392,7 @@ async function spawnPack() {
 
   swiped = false;
   document.getElementById("packResult").innerHTML = "";
-  document.getElementById("packArea").style.display = "block";
-
-  saveGame();
+  document.getElementById("packArea").style.display = "block"
 }
 
 function backToMenu() {
@@ -511,84 +512,53 @@ function revealCards(cardsToReveal) {
   });
 }
 
-function openCollection() {
-  showCollection();
+async function openCollection() {
+  await loadPlayerCards();
+  renderCollectionFromPlayerCards();
   showScreen("collectionScreen");
 }
 
-async function showCollection(){
+function renderCollectionFromPlayerCards() {
+  const area = document.getElementById("collectionList");
+  area.innerHTML = "";
 
-let user = localStorage.getItem("gv_user")
+  if (!playerCards || playerCards.length === 0) {
+    area.innerHTML = "<p>No cards yet</p>";
+    return;
+  }
 
-const { data, error } = await supabaseClient
-.from("player_cards")
-.select(`
-serial_number,
-cards (
-name,
-image,
-team,
-height,
-weight,
-position,
-set,
-logo,
-college
-)
-`)
-.eq("player_id", user)
+  playerCards.forEach((card, index) => {
+    area.innerHTML += `
+      <div class="collectionCard" id="card${index}">
+        <div class="cardInner">
+          <div class="cardFront">
+            <img src="${card.image}">
+          </div>
 
-const area = document.getElementById("collectionList")
-area.innerHTML = ""
+          <div class="cardBack">
+            <img src="${card.logo}" class="cardLogo">
+            <div class="cardName">${card.name}</div>
+            <div>Team: ${card.team}</div>
+            <div>Height: ${card.height}</div>
+            <div>Weight: ${card.weight}</div>
+            <div>Position: ${card.position}</div>
+            <div>College: ${card.college}</div>
+            <div>Set: ${card.set}</div>
+            <div class="cardSerial">#${card.serial}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
 
-if(!data || data.length === 0){
-area.innerHTML = "<p>No cards yet</p>"
-return
-}
-
-data.forEach((entry,index) => {
-
-area.innerHTML += `
-<div class="collectionCard" id="card${index}">
-<div class="cardInner">
-
-<div class="cardFront">
-<img src="${entry.cards.image}">
-</div>
-
-<div class="cardBack">
-  <img src="${entry.cards.logo}" class="cardLogo">
-  <div class="cardName">${entry.cards.name}</div>
-  <div>Team: ${entry.cards.team}</div>
-  <div>Height: ${entry.cards.height}</div>
-  <div>Weight: ${entry.cards.weight}</div>
-  <div>Position: ${entry.cards.position}</div>
-  <div>College: ${entry.cards.college}</div>
-  <div>Set: ${entry.cards.set}</div>
-  <div class="cardSerial">#${entry.serial_number}</div>
-</div>
-
-</div>
-</div>
-`
-
-})
-
-setTimeout(()=>{
-
-data.forEach((entry,index)=>{
-
-let element = document.getElementById("card"+index)
-
-handleCardTouch(element,{
-...entry.cards,
-serial: entry.serial_number
-})
-
-})
-
-},50)
-
+  setTimeout(() => {
+    playerCards.forEach((card, index) => {
+      const element = document.getElementById("card" + index);
+      if (element) {
+        handleCardTouch(element, card);
+      }
+    });
+  }, 50);
 }
 
 let lastTapTime = 0;
@@ -745,38 +715,34 @@ document.getElementById("profileCoins").innerText = "Coins: " + coinsStored
 }
 
 window.onload = function () {
-
-  // ✅ FIRST: grab ALL DOM elements
   canvas = document.getElementById("gameCanvas");
-  ctx = canvas.getContext("2d");
+  if (canvas) {
+    ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+  }
 
   base = document.getElementById("joystickBase");
   stick = document.getElementById("joystickStick");
 
-  ctx.imageSmoothingEnabled = false;
-
-  // ✅ THEN run setup
   resizeCanvas();
   checkGameVersion();
   loadGame();
   loadProfile();
 
-  // hide all screens
   document.querySelectorAll(".screen").forEach(s => {
     s.classList.remove("active");
   });
 
   showScreen("loginScreen");
 
-  // profile button
   const profileBtn = document.getElementById("profileBtn");
   if (profileBtn) {
     profileBtn.onclick = () => {
       showScreen("profileScreen");
+      loadFriends();
     };
   }
 
-  // pack swipe
   const pack = document.getElementById("packImage");
   if (pack) {
     pack.addEventListener("touchstart", e => {
@@ -794,9 +760,7 @@ window.onload = function () {
     });
   }
 
-  // 🎮 JOYSTICK (SAFE NOW)
   if (base && stick) {
-
     base.addEventListener("touchstart", e => {
       e.preventDefault();
       joystick.active = true;
@@ -833,10 +797,8 @@ window.onload = function () {
       stick.style.left = "40px";
       stick.style.top = "40px";
     });
-
   }
 
-  // start loop LAST
   gameLoop();
 };
 
@@ -950,37 +912,43 @@ list.innerHTML += `<p>${player.username}</p>`
 
 }
 
-async function loadPlayerCards(){
+async function loadPlayerCards() {
+  const user = localStorage.getItem("gv_user");
+  if (!user) return;
 
-let user = localStorage.getItem("gv_user")
-if(!user) return
+  const { data, error } = await supabaseClient
+    .from("player_cards")
+    .select(`
+      serial_number,
+      cards (
+        name,
+        image,
+        team,
+        height,
+        weight,
+        position,
+        set,
+        logo,
+        college
+      )
+    `)
+    .eq("player_id", user);
 
-const { data, error } = await supabaseClient
-.from("player_cards")
-.select(`
-serial_number,
-cards (
-name,
-image,
-team,
-height,
-weight,
-position,
-set,
-logo,
-college
-)
-`)
-.eq("player_id", user)
+  if (error) {
+    console.error("LOAD PLAYER CARDS ERROR:", error);
+    playerCards = [];
+    return;
+  }
 
-if(error){
-console.error(error)
-return
-}
+  if (!data) {
+    playerCards = [];
+    return;
+  }
 
-playerCards = data.map(entry => ({
-...entry.cards,
-serial: entry.serial_number
-}))
-
+  playerCards = data
+    .filter(entry => entry.cards)
+    .map(entry => ({
+      ...entry.cards,
+      serial: entry.serial_number
+    }));
 }
