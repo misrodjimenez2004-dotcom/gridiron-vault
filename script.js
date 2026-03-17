@@ -80,18 +80,22 @@ function updateCoins() {
   animateCoins(coins);
 }
 
-function saveGame() {
+async function saveGame() {
   localStorage.setItem("gv_coins", coins);
   localStorage.setItem("gv_cards", JSON.stringify(playerCards));
 
   const user = localStorage.getItem("gv_user");
 
   if (user) {
-    supabaseClient
-      .from("players")
-      .update({ coins: coins })
-      .eq("id", user);
-  }
+    const { error } = await supabaseClient
+  .from("players")
+  .update({ coins: coins })
+  .eq("id", user);
+
+if (error) {
+  console.error("SAVE COINS ERROR:", error);
+}
+}
 }
 
 function checkGameVersion() {
@@ -139,7 +143,7 @@ function startGame() {
   document.getElementById("yardScore").innerText = "Yards: 0";
 }
 
-function gameOver() {
+async function gameOver() {
   if (!gameRunning) return;
 
   gameRunning = false;
@@ -148,7 +152,7 @@ function gameOver() {
   coins += earnedCoins;
 
   updateCoins();
-  saveGame();
+  await saveGame();
 
   alert(
     "Tackled!\nYou ran " +
