@@ -60,10 +60,20 @@ function showScreen(screen) {
   if (target) target.classList.add("active");
 
   if (screen === "gameScreen") {
-    base.style.display = "block";
-  } else {
-    base.style.display = "none";
-  }
+  base.style.display = "block";
+
+  // 🔥 IMPORTANT FIX
+  setTimeout(() => {
+    resizeCanvas();
+
+    // reset player position so it’s visible
+    player.x = canvas.width / 2;
+    player.y = canvas.height - 120;
+  }, 50);
+
+} else {
+  base.style.display = "none";
+}
 
   // update coins everywhere
   if(document.getElementById("coins")){
@@ -200,6 +210,7 @@ function loadGame() {
 
 
 function startGame() {
+  resizeCanvas();
   showScreen("gameScreen");
 
   gameRunning = true;
