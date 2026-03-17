@@ -8,17 +8,14 @@ const supabaseClient = window.supabase.createClient(
 
 let coins = 0;
 let playerCards = [];
-let imageCache = {};
 let startX = 0;
 let swiped = false;
 let defenders = [];
 let spawnTimer = 0;
 let gameRunning = false;
 let yards = 0;
-let pressTimer = null;
 let fieldScroll = 0;
 let packPrice = 0;
-let longPressTriggered = false;
 
 let fieldImage = new Image();
 fieldImage.src = "images/field.png";
@@ -266,7 +263,7 @@ function showPackScreen() {
   showScreen("packScreen");
 }
 
-function spawnPack() {
+async function spawnPack() {
   if (coins < packPrice) {
     alert("Not enough coins");
     return;
@@ -274,6 +271,7 @@ function spawnPack() {
 
   coins -= packPrice;
   updateCoins();
+  await saveGame();
 
   swiped = false;
   document.getElementById("packResult").innerHTML = "";
@@ -487,6 +485,7 @@ let pressTimer = null
 let longPress = false
 
 cardElement.addEventListener("touchstart", e => {
+e.preventDefault()
 
 pressTimer = setTimeout(()=>{
 longPress = true
@@ -581,9 +580,6 @@ async function login(){
 let username = document.getElementById("usernameInput").value
 let password = document.getElementById("passwordInput").value
 
-document.getElementById("profileUsername").innerText = "User: " + data.username
-document.getElementById("profileCoins").innerText = "Coins: " + data.coins
-
 const { data, error } = await supabaseClient
 .from("players")
 .select("*")
@@ -603,7 +599,11 @@ alert("Invalid username or password")
 return
 }
 
+document.getElementById("profileUsername").innerText = "User: " + data.username
+document.getElementById("profileCoins").innerText = "Coins: " + data.coins
+
 localStorage.setItem("gv_user", data.id)
+localStorage.setItem("gv_username", data.username)
 
 coins = data.coins || 0
 updateCoins()
@@ -614,15 +614,35 @@ showScreen("menuScreen")
 
 }
 
+function loadProfile(){
+
+let username = localStorage.getItem("gv_username")
+let coinsStored = localStorage.getItem("gv_coins")
+
+if(username){
+document.getElementById("profileUsername").innerText = "User: " + username
+}
+
+if(coinsStored){
+document.getElementById("profileCoins").innerText = "Coins: " + coinsStored
+}
+
+}
+
 window.onload = function () {
   resizeCanvas();
   checkGameVersion();
   loadGame();
+  loadProfile()
 
   const pack = document.getElementById("packImage");
 
-  document.getElementById("profileBtn").onclick = () => {
+  const profileBtn = document.getElementById("profileBtn")
+
+if(profileBtn){
+profileBtn.onclick = () => {
 showScreen("profileScreen")
+}
 }
 
   if (pack) {
