@@ -37,9 +37,7 @@ button {
   color: white;
 }
 
-/* Game screen */
 #gameScreen {
-  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
@@ -134,7 +132,6 @@ button {
 
 /* Collection screen */
 #collectionScreen {
-  display: none;
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
