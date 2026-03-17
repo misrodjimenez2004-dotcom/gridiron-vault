@@ -609,6 +609,7 @@ coins = data.coins || 0
 updateCoins()
 
 await loadPlayerCards()
+await loadFriends()
 
 showScreen("menuScreen")
 
@@ -735,10 +736,10 @@ alert("Enter username")
 return
 }
 
-// find friend user
+// find friend
 const { data: friend, error: findError } = await supabaseClient
 .from("players")
-.select("id, username")
+.select("id")
 .eq("username", username)
 .single()
 
@@ -747,14 +748,8 @@ alert("User not found")
 return
 }
 
-// prevent adding yourself
-if(friend.id === user){
-alert("You can't add yourself")
-return
-}
-
-// insert friendship
-const { error } = await supabaseClient
+// insert
+const { data, error } = await supabaseClient
 .from("friends")
 .insert([
 {
@@ -762,10 +757,12 @@ player_id: user,
 friend_id: friend.id
 }
 ])
+.select()
+
+console.log("INSERT RESULT:", data, error)
 
 if(error){
-console.error(error)
-alert("Already added or error")
+alert("Error adding friend")
 return
 }
 
