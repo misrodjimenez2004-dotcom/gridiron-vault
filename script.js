@@ -83,7 +83,6 @@ function updateCoins() {
 function saveGame() {
   localStorage.setItem("gv_coins", coins);
   localStorage.setItem("gv_cards", JSON.stringify(playerCards));
-  localStorage.setItem("gv_database", JSON.stringify(cards));
 
   const user = localStorage.getItem("gv_user");
 
@@ -107,7 +106,6 @@ function checkGameVersion() {
 function loadGame() {
   const savedCoins = localStorage.getItem("gv_coins");
   const savedCards = localStorage.getItem("gv_cards");
-  const savedDatabase = localStorage.getItem("gv_database");
 
   if (savedCoins) {
     coins = parseInt(savedCoins, 10);
@@ -117,28 +115,9 @@ function loadGame() {
     playerCards = JSON.parse(savedCards);
   }
 
-  if (savedDatabase) {
-    cards = JSON.parse(savedDatabase);
-  }
-
   updateCoins();
 }
 
-function assignCardIDs(){
-
-cards.forEach((card, index) => {
-card.id = index + 1
-})
-
-}
-
-function preloadImages() {
-  cards.forEach(card => {
-    const img = new Image();
-    img.src = card.image;
-    imageCache[card.image] = img;
-  });
-}
 
 function startGame() {
   showScreen("gameScreen");
@@ -322,8 +301,8 @@ const { data, error } = await supabaseClient
 .rpc("open_pack",{ player: user })
 
 if(error){
-console.error(error)
-alert("Pack error")
+console.error("PACK ERROR:", error)
+alert("Pack error: " + error.message)
 return
 }
 
@@ -401,14 +380,14 @@ function revealCards(cardsToReveal) {
     cardDiv.addEventListener("touchstart", e => {
       e.preventDefault();
       if (img.dataset.revealed) return;
-      img.src = imageCache[card.image].src;
+      img.src = card.image;
       img.dataset.revealed = "true";
     });
 
     cardDiv.addEventListener("click", e => {
       e.preventDefault();
       if (img.dataset.revealed) return;
-      img.src = imageCache[card.image].src;
+      img.src = card.image;
       img.dataset.revealed = "true";
     });
 
@@ -631,14 +610,6 @@ showScreen("menuScreen")
 window.onload = function () {
   resizeCanvas();
   checkGameVersion();
-
-  if (typeof cards === "undefined") {
-    console.error("cards.js failed to load");
-    return;
-  }
-
-  assignCardIDs();
-  preloadImages();
   loadGame();
 
   const pack = document.getElementById("packImage");
@@ -726,12 +697,24 @@ if ("serviceWorker" in navigator) {
 async function loadPlayerCards(){
 
 let user = localStorage.getItem("gv_user")
-
 if(!user) return
 
 const { data, error } = await supabaseClient
 .from("player_cards")
-.select("serial_number, card_id")
+.select(`
+serial_number,
+cards (
+name,
+image,
+team,
+height,
+weight,
+position,
+set,
+logo,
+college
+)
+`)
 .eq("player_id", user)
 
 if(error){
@@ -739,21 +722,9 @@ console.error(error)
 return
 }
 
-playerCards = []
-
-for(const entry of data){
-
-let cardInfo = cards.find(c => c.id === entry.card_id)
-
-if(cardInfo){
-
-playerCards.push({
-...cardInfo,
-serial: entry.serial
-})
-
-}
-
-}
+playerCards = data.map(entry => ({
+...entry.cards,
+serial: entry.serial_number
+}))
 
 }
