@@ -66,7 +66,9 @@ function showScreen(screen) {
   }
 
   // update coins everywhere
+  if(document.getElementById("coins")){
   document.getElementById("coins").innerText = coins
+  }
 
   if(document.getElementById("slotsCoins")){
     document.getElementById("slotsCoins").innerText = coins
