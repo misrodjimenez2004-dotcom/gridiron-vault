@@ -727,22 +727,22 @@ if ("serviceWorker" in navigator) {
 
 async function addFriend(){
 
-let username = document.getElementById("friendInput").value
+let username = document.getElementById("friendInput").value.trim()
 let user = localStorage.getItem("gv_user")
 
 if(!username){
-alert("Enter a username")
+alert("Enter username")
 return
 }
 
-// find player
-const { data: friend, error } = await supabaseClient
+// find friend user
+const { data: friend, error: findError } = await supabaseClient
 .from("players")
-.select("*")
+.select("id, username")
 .eq("username", username)
 .single()
 
-if(error || !friend){
+if(findError || !friend){
 alert("User not found")
 return
 }
@@ -753,16 +753,18 @@ alert("You can't add yourself")
 return
 }
 
-// insert friend
-const { error: insertError } = await supabaseClient
+// insert friendship
+const { error } = await supabaseClient
 .from("friends")
-.insert([{
+.insert([
+{
 player_id: user,
 friend_id: friend.id
-}])
+}
+])
 
-if(insertError){
-console.error(insertError)
+if(error){
+console.error(error)
 alert("Already added or error")
 return
 }
@@ -776,24 +778,28 @@ loadFriends()
 async function loadFriends(){
 
 let user = localStorage.getItem("gv_user")
+if(!user) return
 
 const { data, error } = await supabaseClient
 .from("friends")
 .select(`
 friend_id,
-players!friends_friend_id_fkey (
+players (
 username
 )
 `)
 .eq("player_id", user)
 
-if(error){
-console.error(error)
-return
-}
+console.log("FRIENDS DATA:", data, error)
 
 const list = document.getElementById("friendsList")
 list.innerHTML = ""
+
+if(error){
+console.error(error)
+list.innerHTML = "<p>Error loading friends</p>"
+return
+}
 
 if(!data || data.length === 0){
 list.innerHTML = "<p>No friends yet</p>"
