@@ -64,6 +64,60 @@ function showScreen(screen) {
   } else {
     base.style.display = "none";
   }
+
+  if(screen === "slotsScreen"){
+  document.getElementById("slotsCoins").innerText = coins
+}
+}
+
+function spinSlots(){
+
+if(coins < 20){
+alert("Not enough coins to play this game")
+return
+}
+
+coins -= 20
+
+const symbols = ["🏈","🏆","🔥","💎"]
+
+let s1 = symbols[Math.floor(Math.random()*symbols.length)]
+let s2 = symbols[Math.floor(Math.random()*symbols.length)]
+let s3 = symbols[Math.floor(Math.random()*symbols.length)]
+
+document.getElementById("slotDisplay").innerText = `${s1} | ${s2} | ${s3}`
+
+let reward = 0
+let resultText = "❌ You lost!"
+
+if(s1 === s2 && s2 === s3){
+
+if(s1 === "🏈"){
+reward = 40
+resultText = "🏈 Small Win!"
+}
+else if(s1 === "🏆"){
+reward = 80
+resultText = "🏆 Big Win!"
+}
+else if(s1 === "💎"){
+reward = 250
+resultText = "💎 JACKPOT!!!"
+}
+else{
+reward = 60
+resultText = "🔥 Bonus Win!"
+}
+
+}
+
+coins += reward
+
+document.getElementById("slotResult").innerText = resultText + " +" + reward
+
+updateCoins()
+saveGame()
+
 }
 
 function resizeCanvas() {

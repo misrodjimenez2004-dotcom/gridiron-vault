@@ -40,6 +40,9 @@
     <button onclick="startGame()">PLAY</button>
     <button onclick="showPackScreen()">OPEN PACK</button>
     <button onclick="openCollection()">COLLECTION</button>
+    <button onclick="showScreen('casinoMenuScreen')" class="casinoBtn">
+  🎰 CASINO
+</button>
   </div>
 </div>
 
@@ -112,6 +115,32 @@
 
 </div>
 
+<div id="casinoMenuScreen" class="screen">
+
+<h2>🎰 Casino 🎰</h2>
+
+<button onclick="showScreen('slotsScreen')">Slots</button>
+
+<button onclick="showScreen('menuScreen')">BACK</button>
+
+</div>
+
+<div id="slotsScreen" class="screen">
+
+<h2>Football Slots</h2>
+
+<p>Coins: <span id="slotsCoins">0</span></p>
+
+<div id="slotDisplay">🏈 | 🏈 | 🏈</div>
+
+<p id="slotResult">Press Spin</p>
+
+<button onclick="spinSlots()">SPIN (20 coins)</button>
+
+<button onclick="showScreen('casinoMenuScreen')">BACK</button>
+
+</div>
+
 <div id="inspectPopup">
 
 <div id="inspectViewer">
@@ -146,7 +175,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="script.js?v=11"></script>
+<script src="script.js?v=12"></script>
 
 </body>
 </html>
