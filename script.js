@@ -83,12 +83,12 @@ function showScreen(screen) {
 
 function spinSlots(){
 
-if(coins < 20){
+if(coins < 5){
 alert("Not enough coins to play this game")
 return
 }
 
-coins -= 20
+coins -= 5
 updateCoins()
 
 document.getElementById("slotsCoins").innerText = coins
@@ -118,19 +118,19 @@ let resultText = "❌ You lost!"
 if(s1 === s2 && s2 === s3){
 
 if(s1 === "🏈"){
-reward = 40
+reward = 60
 resultText = "🏈 Small Win!"
 }
 else if(s1 === "🏆"){
-reward = 80
+reward = 120
 resultText = "🏆 Big Win!"
 }
 else if(s1 === "💎"){
-reward = 250
+reward = 300
 resultText = "💎 JACKPOT!!!"
 }
 else{
-reward = 60
+reward = 75
 resultText = "🔥 Bonus Win!"
 }
 
