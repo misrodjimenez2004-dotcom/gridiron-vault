@@ -581,6 +581,9 @@ async function login(){
 let username = document.getElementById("usernameInput").value
 let password = document.getElementById("passwordInput").value
 
+document.getElementById("profileUsername").innerText = "User: " + data.username
+document.getElementById("profileCoins").innerText = "Coins: " + data.coins
+
 const { data, error } = await supabaseClient
 .from("players")
 .select("*")
@@ -617,6 +620,10 @@ window.onload = function () {
   loadGame();
 
   const pack = document.getElementById("packImage");
+
+  document.getElementById("profileBtn").onclick = () => {
+showScreen("profileScreen")
+}
 
   if (pack) {
     pack.addEventListener("touchstart", e => {
