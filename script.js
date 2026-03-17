@@ -713,17 +713,24 @@ window.onload = function () {
   resizeCanvas();
   checkGameVersion();
   loadGame();
-  loadProfile()
+  loadProfile();
+
+  // 🔥 CRITICAL FIX — hide ALL screens first
+  document.querySelectorAll(".screen").forEach(s => {
+    s.classList.remove("active");
+  });
+
+  // 🔥 show ONLY login screen
+  showScreen("loginScreen");
 
   const pack = document.getElementById("packImage");
 
-  const profileBtn = document.getElementById("profileBtn")
-
-if(profileBtn){
-profileBtn.onclick = () => {
-showScreen("profileScreen")
-}
-}
+  const profileBtn = document.getElementById("profileBtn");
+  if (profileBtn) {
+    profileBtn.onclick = () => {
+      showScreen("profileScreen");
+    };
+  }
 
   if (pack) {
     pack.addEventListener("touchstart", e => {
@@ -778,7 +785,6 @@ showScreen("profileScreen")
     stick.style.top = "40px";
   });
 
-  showScreen("loginScreen");
   gameLoop();
 };
 
