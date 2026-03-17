@@ -208,26 +208,29 @@ function loadGame() {
   updateCoins();
 }
 
-
 function startGame() {
-  resizeCanvas();
   showScreen("gameScreen");
 
-  gameRunning = true;
-  defenders = [];
-  spawnTimer = 0;
-  yards = 0;
-  fieldScroll = 0;
+  setTimeout(() => {
+    resizeCanvas();
 
-  player.x = canvas.width / 2;
-  player.y = canvas.height - 120;
+    gameRunning = true;
+    defenders = [];
+    spawnTimer = 0;
+    yards = 0;
+    fieldScroll = 0;
 
-  joystick.dx = 0;
-  joystick.dy = 0;
-  stick.style.left = "40px";
-  stick.style.top = "40px";
+    player.x = canvas.width / 2;
+    player.y = canvas.height - 120;
 
-  document.getElementById("yardScore").innerText = "Yards: 0";
+    joystick.dx = 0;
+    joystick.dy = 0;
+
+    stick.style.left = "40px";
+    stick.style.top = "40px";
+
+    document.getElementById("yardScore").innerText = "Yards: 0";
+  }, 50);
 }
 
 async function gameOver() {
@@ -318,27 +321,50 @@ function updateGame() {
 function drawGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.drawImage(fieldImage, 0, fieldScroll, canvas.width, fieldImage.height);
-  ctx.drawImage(fieldImage, 0, fieldScroll - fieldImage.height, canvas.width, fieldImage.height);
+  // 🧪 BACKUP (so screen is NEVER blank)
+  ctx.fillStyle = "#0a5f2c";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const size = 120;
-  ctx.drawImage(
-    runnerSprite,
-    player.x - size / 2,
-    player.y - size / 2,
-    size,
-    size
-  );
+  // draw field if loaded
+  if (fieldImage.complete) {
+    ctx.drawImage(fieldImage, 0, fieldScroll, canvas.width, fieldImage.height);
+    ctx.drawImage(fieldImage, 0, fieldScroll - fieldImage.height, canvas.width, fieldImage.height);
+  }
 
-  const defenderSize = 160;
-  defenders.forEach(d => {
+  // draw player (fallback circle if image not loaded)
+  if (runnerSprite.complete) {
+    const size = 120;
     ctx.drawImage(
-      defenderSprite,
-      d.x - defenderSize / 2,
-      d.y - defenderSize / 2,
-      defenderSize,
-      defenderSize
+      runnerSprite,
+      player.x - size / 2,
+      player.y - size / 2,
+      size,
+      size
     );
+  } else {
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // draw defenders
+  defenders.forEach(d => {
+    if (defenderSprite.complete) {
+      const size = 160;
+      ctx.drawImage(
+        defenderSprite,
+        d.x - size / 2,
+        d.y - size / 2,
+        size,
+        size
+      );
+    } else {
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, 15, 0, Math.PI * 2);
+      ctx.fill();
+    }
   });
 }
 
