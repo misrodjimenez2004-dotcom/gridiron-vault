@@ -398,12 +398,6 @@ html, body {
   margin-bottom:5px;
 }
 
-#profileBtn{
-display:block;
-margin:10px auto;   /* centers it */
-width:180px;
-}
-
 #profileBtn img{
 width:100%;
 height:100%;
@@ -411,4 +405,16 @@ height:100%;
 
 #profileBtn:active{
 transform:scale(0.95);
+}
+
+#menuContainer{
+position:relative;
+}
+
+#profileBtn{
+position:absolute;
+top:70px;     /* adjust up/down */
+left:10px;    /* adjust left/right */
+width:160px;
+z-index:5;
 }
