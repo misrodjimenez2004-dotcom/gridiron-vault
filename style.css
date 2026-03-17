@@ -24,19 +24,6 @@ body {
   overflow: hidden;
 }
 
-/* Screens */
-.screen {
-  display: none;
-  width: 100%;
-  height: 100vh;
-  box-sizing: border-box;
-  padding: 20px;
-}
-
-#menuScreen {
-  display: block;
-}
-
 /* Buttons */
 button {
   width: 90%;
