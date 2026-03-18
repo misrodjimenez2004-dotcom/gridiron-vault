@@ -365,13 +365,18 @@ html, body {
 .cardName {
   font-weight: bold;
   font-size: 10px;
-
   text-align: center;
 
-  /* 🔥 KEY FIXES */
-  max-height: 24px;
-  overflow: hidden;
   line-height: 1.1;
+
+  /* 🔥 allow 2 lines instead of cutting it off completely */
+  max-height: 22px;
+  overflow: hidden;
+
+  /* optional but nice */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 #profileBtn:active{

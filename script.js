@@ -550,7 +550,7 @@ function renderCollectionFromPlayerCards() {
     <div>Set: ${card.set}</div>
   </div>
 
-  <div class="cardSerial">#${card.serial}</div>
+  <div class="cardSerial">#${card.serial} / ${card.total_supply}</div>
 
 </div>
         </div>
@@ -934,16 +934,17 @@ async function loadPlayerCards() {
     .select(`
       serial_number,
       cards (
-        name,
-        image,
-        team,
-        height,
-        weight,
-        position,
-        set,
-        logo,
-        college
-      )
+  name,
+  image,
+  team,
+  height,
+  weight,
+  position,
+  set,
+  logo,
+  college,
+  total_supply
+)
     `)
     .eq("player_id", user);
 
@@ -962,6 +963,7 @@ async function loadPlayerCards() {
     .filter(entry => entry.cards)
     .map(entry => ({
       ...entry.cards,
-      serial: entry.serial_number
+      serial: entry.serial_number,
+      total_supply: entry.cards.total_supply
     }));
 }
