@@ -27,6 +27,9 @@ let spinning = false;
 let spinSpeed = 0;
 let winningNumber = null;
 let ctx = null;
+let ballAngle = 0;
+let ballSpeed = 0;
+let ballRadius = 110; // slightly outside wheel
 let base = null;
 let stick = null;
 
@@ -296,6 +299,7 @@ function drawWheel() {
   const radius = size / 2;
 
   wheelCtx.clearRect(0, 0, size, size);
+  wheelCtx.imageSmoothingEnabled = false;
 
   for (let i = 1; i <= 12; i++) {
     const angle = (Math.PI * 2 / 12) * i + wheelAngle;
@@ -304,7 +308,7 @@ function drawWheel() {
     wheelCtx.moveTo(center, center);
     wheelCtx.arc(center, center, radius, angle, angle + (Math.PI * 2 / 12));
 
-    wheelCtx.fillStyle = i % 2 === 0 ? "red" : "black";
+    wheelCtx.fillStyle = i % 2 === 0 ? "#c0392b" : "#111";
     wheelCtx.fill();
 
     // number text
@@ -312,17 +316,30 @@ function drawWheel() {
     wheelCtx.translate(center, center);
     wheelCtx.rotate(angle + (Math.PI / 12));
     wheelCtx.fillStyle = "white";
-    wheelCtx.font = "14px Arial";
+    wheelCtx.font = "bold 14px monospace";
     wheelCtx.fillText(i, radius - 30, 5);
     wheelCtx.restore();
   }
+
+  // 🟡 DRAW BALL
+const ballCenter = wheelCanvas.width / 2;
+
+const ballX = ballCenter + Math.cos(ballAngle) * ballRadius;
+const ballY = ballCenter + Math.sin(ballAngle) * ballRadius;
+
+wheelCtx.beginPath();
+wheelCtx.arc(ballX, ballY, 6, 0, Math.PI * 2);
+wheelCtx.fillStyle = "white";
+wheelCtx.fill();
 }
 
 function spinWheelAnimation() {
   spinning = true;
-  spinSpeed = 0.3;
 
-  let duration = 2000; // spin time
+  spinSpeed = 0.35;
+  ballSpeed = 0.45;
+
+  let duration = 2500;
   let start = Date.now();
 
   function animate() {
@@ -330,14 +347,20 @@ function spinWheelAnimation() {
 
     let elapsed = Date.now() - start;
 
-    // slow down
-    spinSpeed *= 0.98;
+    // wheel slows
+    spinSpeed *= 0.97;
     wheelAngle += spinSpeed;
+
+    // ball moves opposite direction (looks realistic)
+    ballSpeed *= 0.985;
+    ballAngle -= ballSpeed;
 
     drawWheel();
 
     if (elapsed > duration) {
       spinning = false;
+
+      snapBallToWinner(); // 🔥 important
       finishSpin();
       return;
     }
@@ -346,6 +369,13 @@ function spinWheelAnimation() {
   }
 
   animate();
+}
+
+function snapBallToWinner() {
+  const slice = (Math.PI * 2) / 12;
+
+  // align ball to winning slice
+  ballAngle = (slice * winningNumber) + wheelAngle;
 }
 
 function finishSpin() {
