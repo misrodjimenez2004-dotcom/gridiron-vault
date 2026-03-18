@@ -17,6 +17,8 @@ let yards = 0;
 let fieldScroll = 0;
 let packPrice = 250;
 let canvas = null;
+let roulettePlayers = [];
+let playerConfirmed = false;
 let ctx = null;
 let base = null;
 let stick = null;
@@ -76,7 +78,7 @@ function showScreen(screen) {
     renderRouletteBoard();
     document.getElementById("rouletteCoins").innerText = coins;
   }
-  
+
   if (screen === "gameScreen") {
     requestAnimationFrame(() => {
       resizeCanvas();
@@ -188,6 +190,100 @@ function renderRouletteBoard() {
 
     board.appendChild(div);
   }
+}
+
+function confirmBet() {
+  if (!selectedNumber) {
+    alert("Pick a number first");
+    return;
+  }
+
+  if (coins < currentBet) {
+    alert("Not enough coins");
+    return;
+  }
+
+  // remove coins immediately
+  coins -= currentBet;
+  updateCoins();
+
+  playerConfirmed = true;
+
+  roulettePlayers = [];
+
+  // add YOU
+  roulettePlayers.push({
+    name: "You",
+    number: selectedNumber,
+    bet: currentBet
+  });
+
+  document.getElementById("rouletteStatus").innerText = "Waiting for players...";
+
+  // simulate AI joining
+  spawnAIPlayers();
+
+  // short delay then resolve
+  setTimeout(() => {
+    resolveRoulette();
+  }, 1500);
+}
+
+function spawnAIPlayers() {
+  const aiCount = Math.floor(Math.random() * 4) + 2; // 2–5 AI
+
+  for (let i = 0; i < aiCount; i++) {
+    roulettePlayers.push({
+      name: "AI_" + (i + 1),
+      number: Math.floor(Math.random() * 12) + 1,
+      bet: Math.floor(Math.random() * 30) + 20
+    });
+  }
+}
+
+function resolveRoulette() {
+  document.getElementById("rouletteStatus").innerText = "Bets Closed";
+
+  // 🎯 pick winning number
+  const winningNumber = Math.floor(Math.random() * 12) + 1;
+
+  // total pot
+  let totalPot = 0;
+  roulettePlayers.forEach(p => totalPot += p.bet);
+
+  // find winners
+  const winners = roulettePlayers.filter(p => p.number === winningNumber);
+
+  let message = "Winning Number: " + winningNumber + "\n";
+
+  if (winners.length === 0) {
+    message += "No winners!";
+  } else {
+    const payout = Math.floor(totalPot / winners.length);
+
+    winners.forEach(w => {
+      if (w.name === "You") {
+        coins += payout;
+      }
+    });
+
+    updateCoins();
+
+    message += "Winners:\n";
+    winners.forEach(w => {
+      message += w.name + " +" + payout + "\n";
+    });
+  }
+
+  alert(message);
+
+  // reset
+  playerConfirmed = false;
+  selectedNumber = null;
+  roulettePlayers = [];
+
+  document.getElementById("rouletteStatus").innerText = "Pick a number";
+  renderRouletteBoard();
 }
 
 function resizeCanvas() {
