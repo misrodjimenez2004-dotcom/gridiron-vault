@@ -522,3 +522,15 @@ transform:scale(0.95);
 .rouletteTile.selected {
   outline: 3px solid gold;
 }
+
+#rouletteCanvas {
+  width: 260px;
+  height: 260px;
+  background: #111;
+  border-radius: 50%;
+  margin: 20px auto;
+}
+
+#rouletteWheelContainer {
+  text-align: center;
+}

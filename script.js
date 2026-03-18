@@ -21,6 +21,11 @@ let packPrice = 250;
 let canvas = null;
 let roulettePlayers = [];
 let playerConfirmed = false;
+let wheelCanvas, wheelCtx;
+let wheelAngle = 0;
+let spinning = false;
+let spinSpeed = 0;
+let winningNumber = null;
 let ctx = null;
 let base = null;
 let stick = null;
@@ -267,14 +272,88 @@ function spawnAIPlayers() {
 function resolveRoulette() {
   document.getElementById("rouletteStatus").innerText = "Bets Closed";
 
-  // 🎯 pick winning number
-  const winningNumber = Math.floor(Math.random() * 12) + 1;
+  // hide board
+  document.getElementById("rouletteBoard").style.display = "none";
 
-  // total pot
+  // show wheel
+  document.getElementById("rouletteWheelContainer").style.display = "block";
+
+  // 🎯 pick winner (DON’T show yet)
+  winningNumber = Math.floor(Math.random() * 12) + 1;
+
+  // start animation
+  spinWheelAnimation();
+}
+
+function drawWheel() {
+  if (!wheelCtx) return;
+
+  const size = 260;
+  wheelCanvas.width = size;
+  wheelCanvas.height = size;
+
+  const center = size / 2;
+  const radius = size / 2;
+
+  wheelCtx.clearRect(0, 0, size, size);
+
+  for (let i = 1; i <= 12; i++) {
+    const angle = (Math.PI * 2 / 12) * i + wheelAngle;
+
+    wheelCtx.beginPath();
+    wheelCtx.moveTo(center, center);
+    wheelCtx.arc(center, center, radius, angle, angle + (Math.PI * 2 / 12));
+
+    wheelCtx.fillStyle = i % 2 === 0 ? "red" : "black";
+    wheelCtx.fill();
+
+    // number text
+    wheelCtx.save();
+    wheelCtx.translate(center, center);
+    wheelCtx.rotate(angle + (Math.PI / 12));
+    wheelCtx.fillStyle = "white";
+    wheelCtx.font = "14px Arial";
+    wheelCtx.fillText(i, radius - 30, 5);
+    wheelCtx.restore();
+  }
+}
+
+function spinWheelAnimation() {
+  spinning = true;
+  spinSpeed = 0.3;
+
+  let duration = 2000; // spin time
+  let start = Date.now();
+
+  function animate() {
+    if (!spinning) return;
+
+    let elapsed = Date.now() - start;
+
+    // slow down
+    spinSpeed *= 0.98;
+    wheelAngle += spinSpeed;
+
+    drawWheel();
+
+    if (elapsed > duration) {
+      spinning = false;
+      finishSpin();
+      return;
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+function finishSpin() {
+
+  // calculate pot
   let totalPot = 0;
   roulettePlayers.forEach(p => totalPot += p.bet);
 
-  // find winners
   const winners = roulettePlayers.filter(p => p.number === winningNumber);
 
   let message = "Winning Number: " + winningNumber + "\n";
@@ -298,16 +377,25 @@ function resolveRoulette() {
     });
   }
 
-  alert(message);
+  document.getElementById("wheelResult").innerText =
+    "Ball landed on: " + winningNumber;
 
-  // reset
-  playerConfirmed = false;
-  selectedNumber = null;
-  currentBet = 0;
-  roulettePlayers = [];
+  setTimeout(() => {
+    alert(message);
 
-  document.getElementById("rouletteStatus").innerText = "Pick a number";
-  renderRouletteBoard();
+    // reset UI
+    document.getElementById("rouletteBoard").style.display = "grid";
+    document.getElementById("rouletteWheelContainer").style.display = "none";
+
+    playerConfirmed = false;
+    selectedNumber = null;
+    currentBet = 0;
+    roulettePlayers = [];
+
+    document.getElementById("rouletteStatus").innerText = "Pick a number";
+    renderRouletteBoard();
+
+  }, 1200);
 }
 
 function resizeCanvas() {
@@ -970,6 +1058,11 @@ window.onload = function () {
       stick.style.top = "40px";
     });
   }
+
+  wheelCanvas = document.getElementById("rouletteCanvas");
+if (wheelCanvas) {
+  wheelCtx = wheelCanvas.getContext("2d");
+}
 
   gameLoop();
 };
