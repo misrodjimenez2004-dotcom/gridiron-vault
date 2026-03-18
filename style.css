@@ -499,3 +499,26 @@ transform:scale(0.95);
   align-items: center;
   z-index: 9999;
 }
+
+#rouletteBoard {
+  display: grid;
+  grid-template-columns: repeat(4, 60px);
+  gap: 10px;
+  justify-content: center;
+  margin: 20px;
+}
+
+.rouletteTile {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.rouletteTile.selected {
+  outline: 3px solid gold;
+}

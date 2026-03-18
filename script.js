@@ -72,6 +72,11 @@ function showScreen(screen) {
     document.getElementById("profileCoins").innerText = "Coins: " + coins;
   }
 
+  if (screen === "rouletteScreen") {
+    renderRouletteBoard();
+    document.getElementById("rouletteCoins").innerText = coins;
+  }
+  
   if (screen === "gameScreen") {
     requestAnimationFrame(() => {
       resizeCanvas();
@@ -149,6 +154,40 @@ saveGame()
 
 }, 100)
 
+}
+
+let selectedNumber = null;
+let currentBet = 20;
+
+function renderRouletteBoard() {
+  const board = document.getElementById("rouletteBoard");
+  board.innerHTML = "";
+
+  for (let i = 1; i <= 12; i++) {
+    const div = document.createElement("div");
+
+    div.innerText = i;
+    div.className = "rouletteTile";
+
+    // color
+    if (i % 2 === 0) {
+      div.style.background = "red";
+    } else {
+      div.style.background = "black";
+    }
+
+    div.onclick = () => {
+      selectedNumber = i;
+
+      document.querySelectorAll(".rouletteTile").forEach(t => {
+        t.classList.remove("selected");
+      });
+
+      div.classList.add("selected");
+    };
+
+    board.appendChild(div);
+  }
 }
 
 function resizeCanvas() {

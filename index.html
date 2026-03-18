@@ -121,6 +121,8 @@
 
 <button onclick="showScreen('slotsScreen')">Slots</button>
 
+<button onclick="showScreen('rouletteScreen')">Roulette</button>
+
 <button onclick="showScreen('menuScreen')">BACK</button>
 
 </div>
@@ -137,6 +139,21 @@
 
 <button onclick="spinSlots()">SPIN (5 coins)</button>
 
+<button onclick="showScreen('casinoMenuScreen')">BACK</button>
+
+</div>
+
+<div id="rouletteScreen" class="screen">
+
+<h2>🎡 Roulette</h2>
+
+<p>Coins: <span id="rouletteCoins">0</span></p>
+
+<div id="rouletteBoard"></div>
+
+<p id="rouletteStatus">Pick a number</p>
+
+<button onclick="confirmBet()">CONFIRM</button>
 <button onclick="showScreen('casinoMenuScreen')">BACK</button>
 
 </div>
