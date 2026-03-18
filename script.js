@@ -536,16 +536,23 @@ function renderCollectionFromPlayerCards() {
           </div>
 
           <div class="cardBack">
-            <img src="${card.logo}" class="cardLogo">
-            <div class="cardName">${card.name}</div>
-            <div>Team: ${card.team}</div>
-            <div>Height: ${card.height}</div>
-            <div>Weight: ${card.weight}</div>
-            <div>Position: ${card.position}</div>
-            <div>College: ${card.college}</div>
-            <div>Set: ${card.set}</div>
-            <div class="cardSerial">#${card.serial}</div>
-          </div>
+
+  <img src="${card.logo}" class="cardLogo">
+
+  <div class="cardName">${card.name}</div>
+
+  <div class="cardInfo">
+    <div>Team: ${card.team}</div>
+    <div>Height: ${card.height}</div>
+    <div>Weight: ${card.weight}</div>
+    <div>Position: ${card.position}</div>
+    <div>College: ${card.college}</div>
+    <div>Set: ${card.set}</div>
+  </div>
+
+  <div class="cardSerial">#${card.serial}</div>
+
+</div>
         </div>
       </div>
     `;
@@ -604,20 +611,20 @@ lastTapTime = now
 function inspectCard(card) {
   document.getElementById("inspectPopup").style.display = "flex";
 
+  // FRONT
   document.getElementById("inspectFront").style.display = "block";
   document.getElementById("inspectBack").style.display = "none";
 
   document.getElementById("inspectFront").src = card.image;
 
+  // BACK (FULL DATA)
   document.getElementById("inspectName").innerText = card.name;
   document.getElementById("inspectTeam").innerText = "Team: " + card.team;
   document.getElementById("inspectHeight").innerText = "Height: " + card.height;
   document.getElementById("inspectWeight").innerText = "Weight: " + card.weight;
-  document.getElementById("inspectForty").innerText = "Position: " + card.position;
-  document.getElementById("inspectSet").innerText = "Set: " + card.set;
-
-  // 🔥 ADD THESE
+  document.getElementById("inspectPosition").innerText = "Position: " + card.position;
   document.getElementById("inspectCollege").innerText = "College: " + card.college;
+  document.getElementById("inspectSet").innerText = "Set: " + card.set;
   document.getElementById("inspectSerial").innerText = "#" + card.serial;
 }
 

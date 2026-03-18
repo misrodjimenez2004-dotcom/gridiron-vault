@@ -344,15 +344,13 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
 
-  font-size: 9px;
-  line-height: 1.2;
-
+  height: 100%;
   padding: 6px;
   box-sizing: border-box;
 
-  overflow: hidden;
+  font-size: 9px;
+  line-height: 1.2;
 }
 
 .cardBack div {
@@ -366,8 +364,14 @@ html, body {
 
 .cardName {
   font-weight: bold;
-  margin-bottom: 4px;
   font-size: 10px;
+
+  text-align: center;
+
+  /* 🔥 KEY FIXES */
+  max-height: 24px;
+  overflow: hidden;
+  line-height: 1.1;
 }
 
 #profileBtn:active{
@@ -450,4 +454,43 @@ transform:scale(0.95);
 
 .screen.active{
   display:flex;
+}
+
+.cardInfo {
+  text-align: center;
+}
+
+.cardSerial {
+  margin-top: auto;
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+#inspectBack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.collectionGrid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  justify-items: center;
+}
+
+#inspectPopup{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
