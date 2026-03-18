@@ -374,8 +374,11 @@ function spinWheelAnimation() {
 function snapBallToWinner() {
   const slice = (Math.PI * 2) / 12;
 
-  // align ball to winning slice
-  ballAngle = (slice * winningNumber) + wheelAngle;
+  // 🎯 force wheel to stop EXACTLY on winning slice
+  wheelAngle = -(slice * winningNumber);
+
+  // 🟡 place ball directly on that slice
+  ballAngle = slice * winningNumber;
 }
 
 function finishSpin() {
