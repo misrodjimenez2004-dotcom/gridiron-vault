@@ -261,7 +261,7 @@ button {
 .cardSerial {
   font-size: 8px;
   text-align: center;
-  margin-top: 3px;
+  margin-top: auto;
   opacity: 0.7;
 }
 
@@ -341,11 +341,22 @@ html, body {
 }
 
 .cardBack {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  font-size: 9px;
+  line-height: 1.2;
+
+  padding: 6px;
+  box-sizing: border-box;
+
+  overflow: hidden;
+}
+
+.cardBack div {
+  margin: 1px 0;
 }
 
 .cardLogo {
@@ -354,8 +365,9 @@ html, body {
 }
 
 .cardName {
-  font-weight:bold;
-  margin-bottom:5px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 10px;
 }
 
 #profileBtn:active{

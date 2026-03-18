@@ -603,16 +603,22 @@ lastTapTime = now
 
 function inspectCard(card) {
   document.getElementById("inspectPopup").style.display = "flex";
+
   document.getElementById("inspectFront").style.display = "block";
   document.getElementById("inspectBack").style.display = "none";
 
   document.getElementById("inspectFront").src = card.image;
+
   document.getElementById("inspectName").innerText = card.name;
   document.getElementById("inspectTeam").innerText = "Team: " + card.team;
   document.getElementById("inspectHeight").innerText = "Height: " + card.height;
   document.getElementById("inspectWeight").innerText = "Weight: " + card.weight;
   document.getElementById("inspectForty").innerText = "Position: " + card.position;
   document.getElementById("inspectSet").innerText = "Set: " + card.set;
+
+  // 🔥 ADD THESE
+  document.getElementById("inspectCollege").innerText = "College: " + card.college;
+  document.getElementById("inspectSerial").innerText = "#" + card.serial;
 }
 
 function flipCard() {
