@@ -14,6 +14,8 @@ let defenders = [];
 let spawnTimer = 0;
 let gameRunning = false;
 let yards = 0;
+let selectedNumber = null;
+let currentBet = 0;
 let fieldScroll = 0;
 let packPrice = 250;
 let canvas = null;
@@ -78,6 +80,10 @@ function showScreen(screen) {
     renderRouletteBoard();
     document.getElementById("rouletteCoins").innerText = coins;
   }
+
+  if (screen === "rouletteScreen") {
+  document.getElementById("rouletteCoins").innerText = coins;
+}
 
   if (screen === "gameScreen") {
     requestAnimationFrame(() => {
@@ -158,9 +164,6 @@ saveGame()
 
 }
 
-let selectedNumber = null;
-let currentBet = 20;
-
 function renderRouletteBoard() {
   const board = document.getElementById("rouletteBoard");
   board.innerHTML = "";
@@ -179,24 +182,44 @@ function renderRouletteBoard() {
     }
 
     div.onclick = () => {
-      selectedNumber = i;
+  const betInput = prompt("How much do you want to bet? (Minimum 25)");
 
-      document.querySelectorAll(".rouletteTile").forEach(t => {
-        t.classList.remove("selected");
-      });
+  if (!betInput) return;
 
-      div.classList.add("selected");
-    };
+  const bet = parseInt(betInput);
+
+  if (isNaN(bet) || bet < 25) {
+    alert("Bet must be at least 25 coins");
+    return;
+  }
+
+  if (bet > coins) {
+    alert("Not enough coins");
+    return;
+  }
+
+  selectedNumber = i;
+  currentBet = bet;
+
+  document.querySelectorAll(".rouletteTile").forEach(t => {
+    t.classList.remove("selected");
+  });
+
+  div.classList.add("selected");
+
+  document.getElementById("rouletteStatus").innerText =
+    "Bet: " + currentBet + " on " + selectedNumber;
+};
 
     board.appendChild(div);
   }
 }
 
 function confirmBet() {
-  if (!selectedNumber) {
-    alert("Pick a number first");
-    return;
-  }
+  if (!selectedNumber || currentBet < 25) {
+  alert("Pick a number and enter a valid bet");
+  return;
+}
 
   if (coins < currentBet) {
     alert("Not enough coins");
@@ -280,6 +303,7 @@ function resolveRoulette() {
   // reset
   playerConfirmed = false;
   selectedNumber = null;
+  currentBet = 0;
   roulettePlayers = [];
 
   document.getElementById("rouletteStatus").innerText = "Pick a number";
