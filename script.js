@@ -31,6 +31,7 @@ let ballAngle = 0;
 let ballSpeed = 0;
 let ballRadius = 110; // slightly outside wheel
 let base = null;
+let currentAudio = null;
 let stick = null;
 
 let fieldImage = new Image();
@@ -909,6 +910,20 @@ function inspectCard(card) {
   document.getElementById("inspectCollege").innerText = "College: " + card.college;
   document.getElementById("inspectSet").innerText = "Set: " + card.set;
   document.getElementById("inspectSerial").innerText = "#" + card.serial;
+
+  // 🔊 PLAY AUDIO IF EXISTS
+if (card.audio) {
+
+  // stop previous sound
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+
+  currentAudio = new Audio(card.audio);
+  currentAudio.play().catch(() => {});
+
+}
 }
 
 function flipCard() {
@@ -922,6 +937,10 @@ function flipCard() {
     front.style.display = "block";
     back.style.display = "none";
   }
+
+  if (currentAudio) {
+  currentAudio.pause();
+}
 }
 
 function closeInspect() {
@@ -950,6 +969,12 @@ async function createAccount() {
     alert("Username already taken or account creation failed");
     return;
   }
+
+  if (currentAudio) {
+  currentAudio.pause();
+  currentAudio.currentTime = 0;
+  currentAudio = null;
+}
 
   alert("Account created!");
   showScreen("menuScreen");
@@ -1231,7 +1256,8 @@ async function loadPlayerCards() {
   set,
   logo,
   college,
-  total_supply
+  total_supply,
+  audio
 )
     `)
     .eq("player_id", user);
